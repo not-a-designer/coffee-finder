@@ -1,0 +1,8 @@
+* ::-webkit-scrollbar {
+    display: none;
+}
+
+body {
+    -webkit-user-select: text;
+    user-select: text;
+}

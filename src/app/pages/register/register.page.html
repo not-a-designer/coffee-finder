@@ -1,0 +1,53 @@
+<ion-content padding color="primary">
+  <ion-card color="light">
+    <ion-card-header>
+      <ion-card-subtitle>Coffee Finder</ion-card-subtitle>
+      <ion-card-title>Register</ion-card-title>
+    </ion-card-header>
+    <ion-card-content text-center>
+      <ion-list color="light">
+        <ion-item>
+          <ion-label *ngIf="isAndroid" floating>Email</ion-label>
+          <ion-input 
+            [(ngModel)]="email"
+            type="email" 
+            email 
+            required
+            [placeholder]="!isAndroid ? 'Email' : ''"></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label *ngIf="isAndroid" floating>Password</ion-label>
+          <ion-input 
+            [(ngModel)]="password"
+            min="6"
+            type="password" 
+            [placeholder]="!isAndroid ? 'Password' : ''"
+            required></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label *ngIf="isAndroid" floating>Confirm password</ion-label>
+          <ion-input 
+            [(ngModel)]="confirm"
+            min="6"
+            type="password" 
+            [placeholder]="!isAndroid ? ' Confirm password' : ''"
+            required></ion-input>
+        </ion-item>
+      </ion-list>
+      <ion-button 
+        id="register-button" 
+        margin-top 
+        color="primary" 
+        size="large"
+        expand="full"
+        (click)="doRegister()">Register</ion-button>
+
+      <ion-button 
+      id="auth-toggle" 
+      fill="clear" 
+      href="/tabs/(settings:login)">or Login</ion-button>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

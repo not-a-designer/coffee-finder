@@ -1,0 +1,127 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Settings</ion-title>
+
+    <ion-buttons slot="end">
+      <ion-button 
+        *ngIf="!changesSaved" 
+        fill="outline" 
+        (click)="saveUser()">
+        Update User
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content padding>
+  <ion-card>
+    <ion-card-content>
+      <ion-list>
+        <ion-item-group>
+          <ion-item-divider color="light">
+            <ion-icon color="primary" slot="start" name="people"></ion-icon>
+            <ion-label>&nbsp;User Details</ion-label>
+          </ion-item-divider>
+          <ion-item>
+            <ion-label slot="start" position="fixed">Display name</ion-label>
+            <ion-input 
+              id="displayName"
+              name="displayName"
+              type="text" 
+              #displayNameInput
+              [(ngModel)]="user.displayName"
+              placeholder="Display name not set"
+              (ionChange)="changesMade($event)"></ion-input>
+          </ion-item>
+    
+          <ion-item>
+            <ion-label slot="start" position="fixed">First name</ion-label>
+            <ion-input 
+              id="firstName"
+              name="firstName"
+              #firstNameInput
+              [(ngModel)]="user.firstName"
+              type="text" 
+              placeholder="First name not set"
+              (ionChange)="changesMade($event)"></ion-input>
+          </ion-item>
+    
+          <ion-item>
+            <ion-label slot="start" position="fixed">Last name</ion-label>
+            <ion-input 
+              id="lastName"
+              name="lastName"
+              #lastNameInput
+              [(ngModel)]="user.lastName"
+              type="text" 
+              placeholder="Last name not set"
+              (ionChange)="changesMade($event)"></ion-input>
+          </ion-item>
+        </ion-item-group>
+
+        <ion-item-group>
+          <ion-item-divider color="light">
+            <ion-icon color="primary" slot="start" name="contact"></ion-icon>
+            <ion-label color="dark">&nbsp;Email & Password</ion-label>
+          </ion-item-divider>
+  
+          <ion-item text-center>
+            <ng-container *ngIf="screenWidth >= 576" text-wrap>
+              {{ user.email }}
+            </ng-container>
+
+            <ng-container *ngIf="screenWidth < 576" text-wrap>
+              {{ user.email | reverseTruncate : 5 }}
+            </ng-container>
+          
+            <ion-button slot ="end">
+              <ion-icon name="build"></ion-icon>
+            </ion-button>
+          </ion-item>
+
+          <ion-item text-center>
+            **************
+            <ion-button slot ="end">
+              <ion-icon name="build"></ion-icon>
+            </ion-button>
+          </ion-item>
+        </ion-item-group>
+
+        <ion-item-group>
+          <ion-item-divider color="light">
+            <ion-icon color="primary" slot="start" name="options"></ion-icon>
+            <ion-label>&nbsp;Theme</ion-label>
+          </ion-item-divider>
+          <ion-item>
+            <ion-label>
+              {{ themeToggle.checked ? 'Switch to Default' : 'Switch to Dark mode' }}
+            </ion-label>
+            <ion-toggle 
+              disabled="true"
+              color="light"
+              #themeToggle 
+              slot="end" 
+              (ionChange)="toggleTheme($event)"></ion-toggle>
+          </ion-item>
+        </ion-item-group>
+        <ion-item-group>
+          <ion-item-divider color="light">
+            <ion-icon name="key" slot="start" color="primary"></ion-icon>
+            <ion-label>&nbsp;Account</ion-label>
+          </ion-item-divider>
+          <ion-item 
+            id="logout-button" 
+            button 
+            text-center 
+            color="danger" 
+            detail="true" 
+            detailIcon="log-out"
+            (click)="showLogoutAlert()">
+            Logout
+          </ion-item>
+        </ion-item-group>
+      </ion-list>
+    </ion-card-content>
+  </ion-card>
+  
+</ion-content>

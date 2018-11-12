@@ -1,0 +1,53 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-icon name="search"></ion-icon>
+    </ion-buttons>
+
+    <ion-title>Find Coffee</ion-title>
+
+    <ion-buttons slot="end">
+      <ion-button (click)="toggleRadius()">
+        <ng-container *ngIf="showRadius">Radius: {{ (radius / 1600) | number: '1.0-2' }}mi</ng-container>
+        <ng-container *ngIf="!showRadius">Change Radius</ng-container>
+        <ion-icon slot="end" [name]="!showRadius ? 'arrow-dropdown' : 'arrow-dropup'"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+  <ion-toolbar color="primary" *ngIf="showRadius">
+    <ion-range 
+      #radiusRange
+      no-padding
+      name="radius"
+      [(ngModel)]="radius"
+      id="radius" 
+      min="1600" 
+      max="16000" 
+      debounce="500"
+      color="light">
+      <ion-icon name="walk" slot="start" padding-end></ion-icon>
+      <ion-icon name="car" slot="end" padding-start></ion-icon>
+    </ion-range>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-fab horizontal="end" vertical="start" slot="fixed">
+    <ion-fab-button mini (click)="getCurrentLocation()">
+      <ion-icon name="locate"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+  <agm-map [latitude]="mapLat" [longitude]="mapLng" [zoom]="mapZoom">
+    <agm-marker [latitude]="mapLat" [longitude]="mapLng" markerDragable="false"></agm-marker>
+    <agm-circle 
+      [radius]="radius" 
+      [latitude]="mapLat" 
+      [longitude]="mapLng" 
+      fillOpacity="0.35" 
+      fillColor="#3171e0" 
+      strokeWeight="2" 
+      strokePosition="0"
+      strokeColor="#3171e0"
+      strokeOpacity="1"></agm-circle>
+  </agm-map>
+</ion-content>
