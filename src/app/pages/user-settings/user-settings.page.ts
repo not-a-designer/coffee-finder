@@ -100,7 +100,11 @@ export class UserSettingsPage implements OnInit {
       await loader.present();
 
       this.auth.logout();
-      if (this.platform.is('cordova')) this.auth.googleLogout();
+      if (this.platform.is('cordova')) {
+        this.auth.googleLogout();
+        const fbStatus = await this.auth.getFbLoginStatus();
+        if (fbStatus === 'connected') this.auth.facebookLogout();
+      }
       await this.router.navigate(['/']);
       loader.dismiss();
     }

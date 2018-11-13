@@ -7,6 +7,7 @@ import { RouteReuseStrategy }                  from '@angular/router';
 
 import { IonicModule, IonicRouteStrategy }     from '@ionic/angular';
 import { AdMobFree }                           from '@ionic-native/admob-free/ngx';
+import { Facebook }                            from '@ionic-native/facebook/ngx';
 import { Geolocation }                         from '@ionic-native/geolocation/ngx';
 import { GooglePlus }                          from '@ionic-native/google-plus/ngx';
 import { SplashScreen }                        from '@ionic-native/splash-screen/ngx';
@@ -45,6 +46,7 @@ import { UserService }                         from '@app-services/user/user.ser
     AdMobFree,
     AuthService,
     AuthGuard,
+    Facebook,
     Geolocation,
     GoogleMapsAPIWrapper,
     GooglePlus,

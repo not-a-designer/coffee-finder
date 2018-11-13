@@ -1,14 +1,11 @@
-import { Component, OnInit }         from '@angular/core';
-import { Router }                    from '@angular/router';
+import { Component, OnInit }           from '@angular/core';
+import { NgForm }                      from '@angular/forms';
+import { Router }                      from '@angular/router';
 
-import { AlertController, Platform } from '@ionic/angular';
+import { LoadingController, Platform } from '@ionic/angular';
 
-import { AuthService }               from '@app-services/auth/auth.service';
-import { UserService }               from '@app-services/user/user.service';
-
-
-const EMAIL_REGEXP: RegExp = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-const PASS_REGEXP: RegExp = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,16}$/;
+import { AuthService, EMAIL_REGEXP, PASS_REGEXP } from '@app-services/auth/auth.service';
+import { UserService }                 from '@app-services/user/user.service';
 
 
 @Component({
@@ -18,12 +15,12 @@ const PASS_REGEXP: RegExp = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,16}$/;
 })
 export class RegisterPage implements OnInit {
 
-  public email: string;
-  public password: string;
-  public confirm: string;
+  public emailPattern: RegExp = EMAIL_REGEXP;
+  public passwordPattern: RegExp = PASS_REGEXP;
+  public passwordVisible: boolean = false;
 
   constructor(private router: Router, 
-              private alertCtrl: AlertController, 
+              private loadingCtrl: LoadingController, 
               private platform: Platform,
               private auth: AuthService,
               private users: UserService) { }
@@ -31,28 +28,27 @@ export class RegisterPage implements OnInit {
   public ngOnInit(): void {
   } 
 
-  public async doRegister(): Promise<void> {
+  public async doRegister(form: NgForm): Promise<void> {
+    let loader: HTMLIonLoadingElement;
     try {
-      if (this.checkEmail(this.email)) {
-        if (this.checkPassword(this.password, this.confirm)) {
-          const credential = await this.auth.emailRegister(this.email, this.password);
-          if (credential.user) {
-            console.log('user: ', credential.user);
-            this.users.updateUser(credential.user);
-            this.router.navigateByUrl('/tabs/(map:map)');
-          }
-        }
-        else {
-          const errorMessage: string = 'Please re/enter a valid password';
-          await this.showErrorAlert(errorMessage);
-        }
-      }
-      else {
-        const errorMessage: string = 'Please enter a valid email';
-        await this.showErrorAlert(errorMessage);
+      loader = await this.loadingCtrl.create({
+        message: 'Authenticating...',
+        spinner: 'circles'
+      });
+  
+      await loader.present();
+
+      const email = form.value.email;
+      const password = form.value.password;
+      const credential = await this.auth.emailRegister(email, password);
+      if (credential.user) {
+        console.log('user: ', credential.user);
+        this.users.updateUser(credential.user);
+        loader.dismiss();
+        this.router.navigateByUrl('/tabs/(map:map)');
       }
     }
-    catch(e) { console.error('doRegister() error: ', e) }
+    catch(e) { if (loader != undefined) loader.dismiss() }
   }
 
   private checkEmail(email: string): boolean {
@@ -74,18 +70,8 @@ export class RegisterPage implements OnInit {
     else return true;
   }
 
-  private async showErrorAlert(msg: string): Promise<void> {
-    try {
-      const errorAlert = await this.alertCtrl.create({
-        header: 'Register Error',
-        message: msg,
-        buttons: ['OK']
-      });
-      await errorAlert.present();
-    }
-    catch(e) { console.error('showErrorAlert() error: ', e) }
-  }
 
   get isAndroid(): boolean { return this.platform.is('android') }
 
+  public togglePasswordVisiblity(): void { this.passwordVisible = !this.passwordVisible }
 }

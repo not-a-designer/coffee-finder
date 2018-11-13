@@ -21,7 +21,7 @@ export class HomePage implements OnInit {
   user$: Observable<User>;
 
   bannerConfig: AdMobFreeBannerConfig = {
-    isTesting: true,
+    isTesting: false,
     autoShow: true,
     id: environment.admobAppID,
     bannerAtTop: false

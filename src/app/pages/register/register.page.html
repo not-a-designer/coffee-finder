@@ -4,50 +4,68 @@
       <ion-card-subtitle>Coffee Finder</ion-card-subtitle>
       <ion-card-title>Register</ion-card-title>
     </ion-card-header>
-    <ion-card-content text-center>
-      <ion-list color="light">
-        <ion-item>
-          <ion-label *ngIf="isAndroid" floating>Email</ion-label>
-          <ion-input 
-            [(ngModel)]="email"
-            type="email" 
-            email 
-            required
-            [placeholder]="!isAndroid ? 'Email' : ''"></ion-input>
-        </ion-item>
+    <form #registerForm="ngForm" (ngSubmit)="doRegister(registerForm)">
+      <ion-card-content text-center>
+        <ion-list color="light">
+          
 
-        <ion-item>
-          <ion-label *ngIf="isAndroid" floating>Password</ion-label>
-          <ion-input 
-            [(ngModel)]="password"
-            min="6"
-            type="password" 
-            [placeholder]="!isAndroid ? 'Password' : ''"
-            required></ion-input>
-        </ion-item>
+          <ion-item>
+            <ion-label *ngIf="isAndroid" floating>Email</ion-label>
+            <ion-input 
+              #emailInput
+              ngModel
+              type="email" 
+              name="email"
+              email 
+              required
+              [placeholder]="!isAndroid ? 'Email' : ''"
+              [pattern]="emailPattern"></ion-input>
+          </ion-item>
 
-        <ion-item>
-          <ion-label *ngIf="isAndroid" floating>Confirm password</ion-label>
-          <ion-input 
-            [(ngModel)]="confirm"
-            min="6"
-            type="password" 
-            [placeholder]="!isAndroid ? ' Confirm password' : ''"
-            required></ion-input>
-        </ion-item>
-      </ion-list>
-      <ion-button 
-        id="register-button" 
-        margin-top 
-        color="primary" 
-        size="large"
-        expand="full"
-        (click)="doRegister()">Register</ion-button>
+          <ion-item>
+            <ion-label *ngIf="isAndroid" floating>Password</ion-label>
+            <ion-input 
+              #passwordInput
+              ngModel
+              name="password"
+              min="6"
+              [type]="passwordVisible ? 'text' : 'password'" 
+              [placeholder]="!isAndroid ? 'Password' : ''"
+              [pattern]="passwordPattern"
+              required></ion-input>
+              <ion-button icon-only slot="end" fill="clear" (click)="togglePasswordVisiblity()">
+                <ion-icon [name]="passwordVisible ? 'eye-off' :'eye'"></ion-icon>
+              </ion-button>
+          </ion-item>
 
-      <ion-button 
-      id="auth-toggle" 
-      fill="clear" 
-      href="/tabs/(settings:login)">or Login</ion-button>
-    </ion-card-content>
+          <ion-item>
+            <ion-label *ngIf="isAndroid" floating>Confirm password</ion-label>
+            <ion-input 
+              #confirmInput
+              ngModel
+              name="confirm"
+              min="6"
+              [type]="passwordVisible ? 'text' : 'password'" 
+              [placeholder]="!isAndroid ? ' Confirm password' : ''"
+              [pattern]="passwordPattern"
+              required></ion-input>
+          </ion-item>
+        </ion-list>
+        <ion-button 
+          id="register-button" 
+          type="submit"
+          margin-top 
+          color="primary" 
+          size="large"
+          expand="full"
+          [disabled]="registerForm.invalid || confirmInput.value != passwordInput.value">Register</ion-button>
+
+        <ion-button 
+        type="button"
+        id="auth-toggle" 
+        fill="clear" 
+        href="/tabs/(settings:login)">or Login</ion-button>
+      </ion-card-content>
+    </form>
   </ion-card>
 </ion-content>

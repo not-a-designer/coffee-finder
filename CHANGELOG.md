@@ -1,6 +1,17 @@
 # Local Coffee Finder Change Log
 
 
+### 0.0.1 11/13/2018 'Facebook authentication added'
+
+@ANGULAR/FIRE
+- Authentication - Implemented passwordReset, facebook browser & native login, logout, auth error checking
+
+@IONIC-NATIVE
+- Facebook
+
+
+
+
 ### 0.0.1 INITIAL COMMIT
 
 @ANGULAR/FIRE

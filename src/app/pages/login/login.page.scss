@@ -2,13 +2,13 @@ ion-card {
     max-width: 600px;
     min-width: 300px;
     width: 60vw;
-    height: 370px;
+    height: 385px;
     margin-left: auto;
     margin-right: auto;
-    margin-top: 20vh;
+    margin-top: calc(50vh - 246px);
 
-    @media screen and (max-height: 510px) { margin-top: 10vh; }
-    @media screen and (max-height: 355px) { margin-top: 0px; }
+    //@media screen and (max-height: 510px) { margin-top: 10vh; }
+    @media screen and (max-height: 470px) { margin-top: 0px; }
 }
  
 #login-button {
@@ -31,6 +31,10 @@ ion-card {
 .social-icon {
     max-height: 20px;
     max-width: 20px;
+}
+
+ion-footer, #forgot-password {
+    --border-color: var(--ion-color-primary);
 }
 
 /*ion-col {

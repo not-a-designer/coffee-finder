@@ -4,75 +4,94 @@
       <ion-card-subtitle>Coffee Finder</ion-card-subtitle>
       <ion-card-title>Login</ion-card-title>
     </ion-card-header>
+    <form #loginForm="ngForm" (ngSubmit)="doLogin(loginForm)">
+      <ion-card-content text-center>
+        <ion-list color="light" text-center>
+          <ion-item>
+            <ion-label *ngIf="isAndroid" floating>Email</ion-label>
+            <ion-input 
+              type="email" 
+              ngModel
+              name="email"
+              email 
+              required
+              [placeholder]="!isAndroid ? 'Email' : ''"
+              [pattern]="emailPattern"></ion-input>
+          </ion-item>
 
-    <ion-card-content text-center>
-      <ion-list color="light" text-center>
-        <ion-item>
-          <ion-label *ngIf="isAndroid" floating>Email</ion-label>
-          <ion-input 
-            type="email" 
-            [(ngModel)]="email"
-            email 
-            required
-            [placeholder]="!isAndroid ? 'Email' : ''"></ion-input>
-        </ion-item>
+          <ion-item>
+            <ion-label *ngIf="isAndroid" floating>Password</ion-label>
+            <ion-input 
+              [type]="passwordVisible ? 'text' : 'password'" 
+              min="6"
+              ngModel
+              name="password"
+              [placeholder]="!isAndroid ? 'Password' : ''"
+              [pattern]="passwordPattern"
+              required></ion-input>
+              <ion-button icon-only slot="end" fill="clear" (click)="togglePasswordVisiblity()">
+                <ion-icon [name]="passwordVisible ? 'eye-off' :'eye'"></ion-icon>
+              </ion-button>
+          </ion-item>
+        </ion-list>
 
-        <ion-item>
-          <ion-label *ngIf="isAndroid" floating>Password</ion-label>
-          <ion-input 
-            type="password" 
-            min="6"
-            [(ngModel)]="password"
-            [placeholder]="!isAndroid ? 'Password' : ''"
-            required></ion-input>
-        </ion-item>
-      </ion-list>
+        <ion-button  
+          margin-top 
+          type="submit"
+          id="login-button" 
+          size="large" 
+          color="primary" 
+          expand="full"
+          [disabled]="loginForm.invalid">Login</ion-button>
+        
+        <ion-row 
+          id="social-row" 
+          justify-content-between 
+          margin-top 
+          no-padding>
+            <ion-fab-button 
+              mini 
+              class="social-login" 
+              color="light" 
+              no-padding 
+              (click)="googleLogin()">
+              <img class="social-icon" src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" />
+            </ion-fab-button>
+        
+            <ion-fab-button 
+              mini 
+              class="social-login" 
+              color="light" 
+              no-padding
+              (click)="facebookLogin()">
+              <img class="social-icon" src="https://upload.wikimedia.org/wikipedia/commons/c/c2/F_icon.svg" />
+            </ion-fab-button>
+        
+            <ion-fab-button 
+              mini 
+              class="social-login" 
+              color="light" 
+              no-padding>
+                <img class="social-icon" src="https://upload.wikimedia.org/wikipedia/fr/c/c8/Twitter_Bird.svg" />
+            </ion-fab-button>
+        </ion-row>
 
-      <ion-button  
-        margin-top 
-        id="login-button" 
-        size="large" 
-        color="primary" 
-        expand="full"
-        (click)="doLogin()">Login</ion-button>
-      
-      <ion-row 
-        id="social-row" 
-        justify-content-between 
-        margin-top 
-        no-padding>
-          <ion-fab-button 
-            mini 
-            class="social-login" 
-            color="light" 
-            no-padding 
-            (click)="googleLogin()">
-            <img class="social-icon" src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" />
-          </ion-fab-button>
-      
-          <ion-fab-button 
-            mini 
-            class="social-login" 
-            color="light" 
-            no-padding>
-            <img class="social-icon" src="https://upload.wikimedia.org/wikipedia/commons/c/c2/F_icon.svg" />
-          </ion-fab-button>
-       
-          <ion-fab-button 
-            mini 
-            class="social-login" 
-            color="light" 
-            no-padding>
-              <img class="social-icon" src="https://upload.wikimedia.org/wikipedia/fr/c/c8/Twitter_Bird.svg" />
-          </ion-fab-button>
-      </ion-row>
-
-      <ion-button 
-        id="auth-toggle" 
-        fill="clear" 
-        href="/tabs/(settings:register)">or Register</ion-button>
-    </ion-card-content>
-
-    
+        <ion-button 
+        type="button"
+          id="auth-toggle" 
+          fill="clear" 
+          href="/tabs/(settings:register)">or Register</ion-button>
+      </ion-card-content>
+    </form>
   </ion-card>
 </ion-content>
+<ion-footer>
+  <ion-toolbar id="forgot-password" color="primary" text-center>
+    <ion-button 
+    type="button"
+      color="light" 
+      size="small" 
+      fill="clear"
+      (click)="doPasswordReset()">Forgot Password?</ion-button>
+  </ion-toolbar>
+</ion-footer>

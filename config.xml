@@ -90,4 +90,8 @@
         <variable name="GEOLOCATION_USAGE_DESCRIPTION" value="To locate you" />
     </plugin>
     <plugin name="cordova-plugin-admob-free" spec="0.22.0" />
+    <plugin name="cordova-plugin-facebook4" spec="3.1.0">
+        <variable name="APP_ID" value="1965311700216800" />
+        <variable name="APP_NAME" value="Local Coffee Finder" />
+    </plugin>
 </widget>
