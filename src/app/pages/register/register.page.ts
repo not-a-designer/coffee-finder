@@ -32,7 +32,7 @@ export class RegisterPage implements OnInit {
     let loader: HTMLIonLoadingElement;
     try {
       loader = await this.loadingCtrl.create({
-        message: 'Authenticating...',
+        message: 'Creating new user...',
         spinner: 'circles'
       });
   
@@ -42,6 +42,7 @@ export class RegisterPage implements OnInit {
       const password = form.value.password;
       const credential = await this.auth.emailRegister(email, password);
       if (credential.user) {
+        if (!credential.user.emailVerified) this.auth.sendEmailVerification();
         console.log('user: ', credential.user);
         this.users.updateUser(credential.user);
         loader.dismiss();

@@ -33,17 +33,6 @@ ion-card {
     max-width: 20px;
 }
 
-ion-footer, #forgot-password {
+ion-footer, ion-toolbar#forgot-password {
     --border-color: var(--ion-color-primary);
 }
-
-/*ion-col {
-    display: -webkit-flex;
-    display: flex;
-    -webkit-flex-direction: row;
-    flex-direction: row;
-    -webkit-align-items: center;
-    align-items: center;
-    -webkit-justify-content: space-between;
-    justify-content: space-between;
- }*/

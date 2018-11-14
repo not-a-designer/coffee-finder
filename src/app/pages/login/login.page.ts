@@ -37,7 +37,7 @@ export class LoginPage implements OnInit {
       if (credential.user) {
         console.log('user: ', credential.user);
         this.users.updateUser(credential.user);
-        this.router.navigateByUrl('/tabs/(map:map)');
+        this.router.navigateByUrl('/tabs/(settings:settings)');
       }
       else console.log('user error'); 
     }
@@ -53,11 +53,27 @@ export class LoginPage implements OnInit {
       if (credential.user) {
         console.log('user: ', credential.user);
         this.users.updateUser(credential.user);
-        this.router.navigateByUrl('/tabs/(map:map)');
+        this.router.navigateByUrl('/tabs/(settings:settings)');
       }
       else console.log('user error'); 
     }
     catch(e) { console.error('facebookLogin() error: ', e) }
+  }
+
+  public async twitterLogin(): Promise<void> {
+    try {
+      const credential = (this.platform.is('cordova')) ?
+        await this.auth.twitterLogin() :
+        await this.auth.browserSocialLogin('twitter');
+
+      if (credential.user) {
+        console.log('user: ', credential.user);
+        this.users.updateUser(credential.user);
+        this.router.navigateByUrl('/tabs/(settings:settings)');
+      }
+      else console.log('user error'); 
+    }
+    catch(e) { console.error('twitterLogin() error: ', e)  }
   }
 
   public async doLogin(form: NgForm): Promise<void> {
@@ -75,7 +91,7 @@ export class LoginPage implements OnInit {
         console.log('user: ', credential.user);
         this.users.updateUser(credential.user);
         loader.dismiss();
-        this.router.navigateByUrl('/tabs/(map:map)');
+        this.router.navigateByUrl('/tabs/(settings:settings)');
       }
     }
     catch(e) { 

@@ -9,3 +9,30 @@ ion-card {
     margin-left: auto;
     margin-right: auto;
 }
+
+#verify-note {
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+    min-width: 400px;
+    width: 70vw;
+}
+
+#copyright-info {
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+    min-width: 460px;
+    width: 70vw;
+}
+
+#copy-toolbar {
+    --border-width: 0;
+    bottom: 0;
+    position: absolute;
+}
+
+ion-thumbnail, .social-icon {
+    max-height: 20px;
+    max-width: 20px;
+}

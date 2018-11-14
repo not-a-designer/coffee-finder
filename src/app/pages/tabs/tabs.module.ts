@@ -15,6 +15,8 @@ import { CoffeeMapPageModule }              from '@app-pages/coffee-map/coffee-m
 import { environment }                      from '@environments/environment';
 import { LoginPageModule }                  from '@app-pages/login/login.module';
 import { RegisterPageModule }               from '@app-pages/register/register.module';
+import { PrivacyPageModule }                from '@app-pages/privacy/privacy.module';
+import { TosPageModule }                    from '@app-pages/tos/tos.module';
 
 
 @NgModule({
@@ -28,7 +30,9 @@ import { RegisterPageModule }               from '@app-pages/register/register.m
     UserSettingsPageModule,
     HomePageModule,
     LoginPageModule,
-    RegisterPageModule
+    RegisterPageModule,
+    PrivacyPageModule,
+    TosPageModule
   ],
 
   declarations: [ TabsPage ],

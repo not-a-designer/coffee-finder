@@ -10,9 +10,7 @@ import { AuthService }                        from '@app-services/auth/auth.serv
 import { User }                               from '@app-interfaces/coffee-user';
 
  
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class AuthResolveService implements Resolve<any> {
  
   constructor(private auth: AuthService, private loadingController: LoadingController, private toastCtrl: ToastController) { }
@@ -26,14 +24,15 @@ export class AuthResolveService implements Resolve<any> {
             await loading.present();
         })
         .catch((error) => console.log('resolve error: ', error));
- 
-    return this.auth.user$.pipe(
+    
+    return this.auth.user$;
+    /*return this.auth.user$.pipe(
         take(1),
         tap(async (user: User) => {
             try {
                 console.log('user found');
                 const userToast = await this.toastCtrl.create({
-                    message: `Logged in with ${user.email}`,
+                    message: `Logged in with ${user.displayName ? user.displayName : user.email}`,
                     duration: 2000,
                     position: 'middle'
                 });
@@ -41,7 +40,7 @@ export class AuthResolveService implements Resolve<any> {
             }
             catch(e) { console.log('resolve() error: ', e) }
         })
-    );
+    );*/
   }
  
 }

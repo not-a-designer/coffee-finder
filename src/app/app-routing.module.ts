@@ -1,8 +1,10 @@
-import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
+import { NgModule }             from '@angular/core';
+import { RouterModule, Routes } from '@angular/router';
 
 
-const routes: Routes = [{ path: '', loadChildren: './pages/tabs/tabs.module#TabsPageModule' }];
+const routes: Routes = [
+  { path: '', loadChildren: './pages/tabs/tabs.module#TabsPageModule' }
+];
 
 
 @NgModule({

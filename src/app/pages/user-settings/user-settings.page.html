@@ -11,117 +11,164 @@
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
+  <!--<ion-toolbar color="medium" text-center *ngIf="!(user.emailVerified || verifyMessageHidden) && user.providerId ==='password'">
+    <ion-item text-wrap color="medium" id="verify-note" lines="none">
+      Check your inbox and validate this email address
+      <ion-button slot="end" color="light" fill="clear" (click)="sendVerificationEmail()">
+        Resend
+        <ion-icon slot="end" name="send"></ion-icon>
+      </ion-button>
+      <ion-button slot="end" fill="clear" icon-only (click)="verifyMessageHidden = !verifyMessageHidden">
+        <ion-icon color="light" name="close"></ion-icon>
+      </ion-button>
+    </ion-item>
+  </ion-toolbar>-->
 </ion-header>
 
-<ion-content padding>
-  <ion-card>
-    <ion-card-content>
-      <ion-list>
-        <ion-item-group>
-          <ion-item-divider color="light">
-            <ion-icon color="primary" slot="start" name="people"></ion-icon>
-            <ion-label>&nbsp;User Details</ion-label>
-          </ion-item-divider>
-          <ion-item>
-            <ion-label slot="start" position="fixed">Display name</ion-label>
-            <ion-input 
-              id="displayName"
-              name="displayName"
-              type="text" 
-              #displayNameInput
-              [(ngModel)]="user.displayName"
-              placeholder="Display name not set"
-              (ionChange)="changesMade($event)"></ion-input>
-          </ion-item>
-    
-          <ion-item>
-            <ion-label slot="start" position="fixed">First name</ion-label>
-            <ion-input 
-              id="firstName"
-              name="firstName"
-              #firstNameInput
-              [(ngModel)]="user.firstName"
-              type="text" 
-              placeholder="First name not set"
-              (ionChange)="changesMade($event)"></ion-input>
-          </ion-item>
-    
-          <ion-item>
-            <ion-label slot="start" position="fixed">Last name</ion-label>
-            <ion-input 
-              id="lastName"
-              name="lastName"
-              #lastNameInput
-              [(ngModel)]="user.lastName"
-              type="text" 
-              placeholder="Last name not set"
-              (ionChange)="changesMade($event)"></ion-input>
-          </ion-item>
-        </ion-item-group>
+<ion-content no-padding>
+  <ion-card *ngIf="user$ | async as user">
+    <form #settingsForm="ngForm">
+      <ion-card-content>
+        <ion-list>
+          <ion-item-group>
+            <ion-item-divider color="light">
+              <ion-icon color="primary" slot="start" name="people"></ion-icon>
+              <ion-label>&nbsp;User Details</ion-label>
+            </ion-item-divider>
+            <ion-item>
+              <ion-label slot="start" position="fixed">Display name</ion-label>
+              <ion-input 
+                id="displayName"
+                name="displayName"
+                type="text" 
+                #displayNameInput
+                [disabled]="!user.emailVerified"
+                [(ngModel)]="user.displayName"
+                placeholder="Display name not set"
+                (ionChange)="changesMade($event)"></ion-input>
+            </ion-item>
+      
+            <ion-item>
+              <ion-label slot="start" position="fixed">First name</ion-label>
+              <ion-input 
+                id="firstName"
+                name="firstName"
+                #firstNameInput
+                [disabled]="!user.emailVerified"
+                [(ngModel)]="user.firstName"
+                type="text" 
+                placeholder="First name not set"
+                (ionChange)="changesMade($event)"></ion-input>
+            </ion-item>
+      
+            <ion-item>
+              <ion-label slot="start" position="fixed">Last name</ion-label>
+              <ion-input 
+                id="lastName"
+                name="lastName"
+                #lastNameInput
+                [disabled]="!user.emailVerified"
+                [(ngModel)]="user.lastName"
+                type="text" 
+                placeholder="Last name not set"
+                (ionChange)="changesMade($event)"></ion-input>
+            </ion-item>
+          </ion-item-group>
 
-        <ion-item-group>
-          <ion-item-divider color="light">
-            <ion-icon color="primary" slot="start" name="contact"></ion-icon>
-            <ion-label color="dark">&nbsp;Email & Password</ion-label>
-          </ion-item-divider>
+          <ion-item-group>
+            <ion-item-divider color="light">
+              <ion-icon color="primary" slot="start" name="contact"></ion-icon>
+              <ion-label color="dark">&nbsp;{{ user.providerId === 'password' ? 'Email & Password' : 'OAuth' }}</ion-label>
+            </ion-item-divider>
+    
+            <ng-container *ngIf="user.providerId === 'password'; else OAuth">
+              <ion-item text-center>
+                <ng-container *ngIf="screenWidth >= 576" text-wrap>
+                  {{ user.email }}
+                </ng-container>
   
-          <ion-item text-center>
-            <ng-container *ngIf="screenWidth >= 576" text-wrap>
-              {{ user.email }}
+                <ng-container *ngIf="screenWidth < 576" text-wrap>
+                  {{ user.email | reverseTruncate : 5 }}
+                </ng-container>
+              
+                <ion-button fill="clear" slot ="end" (click)="updateEmail()">
+                  <ion-icon name="build"></ion-icon>
+                </ion-button>
+              </ion-item>
+  
+              <ion-item text-center>
+                **************
+                <ion-button fill="clear"slot="end" (click)="changePassword()">
+                  <ion-icon name="build"></ion-icon>
+                </ion-button>
+              </ion-item>
             </ng-container>
 
-            <ng-container *ngIf="screenWidth < 576" text-wrap>
-              {{ user.email | reverseTruncate : 5 }}
-            </ng-container>
-          
-            <ion-button slot ="end">
-              <ion-icon name="build"></ion-icon>
-            </ion-button>
-          </ion-item>
+            <ng-template #OAuth>
+              <ion-item [ngSwitch]="user.providerId">
+                <ion-thumbnail slot="start">
+                  <img *ngSwitchCase="'google.com'" class="social-icon" src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" />
+                  <img *ngSwitchCase="'facebook.com'" class="social-icon" src="https://upload.wikimedia.org/wikipedia/commons/c/c2/F_icon.svg" />
+                  <img *ngSwitchCase="'twitter.com'" class="social-icon" src="https://upload.wikimedia.org/wikipedia/fr/c/c8/Twitter_Bird.svg" />
+                </ion-thumbnail>
+                <ion-text *ngSwitchCase="'twitter.com'">Logged in with Twitter</ion-text>
+                <ion-text *ngSwitchCase="'facebook.com'">Logged in with Facebook</ion-text>
+                <ion-text *ngSwitchCase="'google.com'">Logged in with Google</ion-text>
+              </ion-item>
+            </ng-template>
+            
+          </ion-item-group>
 
-          <ion-item text-center>
-            **************
-            <ion-button slot ="end">
-              <ion-icon name="build"></ion-icon>
-            </ion-button>
-          </ion-item>
-        </ion-item-group>
-
-        <ion-item-group>
-          <ion-item-divider color="light">
-            <ion-icon color="primary" slot="start" name="options"></ion-icon>
-            <ion-label>&nbsp;Theme</ion-label>
-          </ion-item-divider>
-          <ion-item>
-            <ion-label>
-              {{ themeToggle.checked ? 'Switch to Default' : 'Switch to Dark mode' }}
-            </ion-label>
-            <ion-toggle 
-              disabled="true"
-              color="light"
-              #themeToggle 
-              slot="end" 
-              (ionChange)="toggleTheme($event)"></ion-toggle>
-          </ion-item>
-        </ion-item-group>
-        <ion-item-group>
-          <ion-item-divider color="light">
-            <ion-icon name="key" slot="start" color="primary"></ion-icon>
-            <ion-label>&nbsp;Account</ion-label>
-          </ion-item-divider>
-          <ion-item 
-            id="logout-button" 
-            button 
-            text-center 
-            color="danger" 
-            detail="true" 
-            detailIcon="log-out"
-            (click)="showLogoutAlert()">
-            Logout
-          </ion-item>
-        </ion-item-group>
-      </ion-list>
-    </ion-card-content>
+          <ion-item-group>
+            <ion-item-divider color="light">
+              <ion-icon color="primary" slot="start" name="options"></ion-icon>
+              <ion-label>&nbsp;Theme</ion-label>
+            </ion-item-divider>
+            <ion-item>
+              <ion-label>
+                {{ themeToggle.checked ? 'Switch to Default' : 'Switch to Dark mode' }}
+              </ion-label>
+              <ion-toggle 
+                disabled="true"
+                color="light"
+                #themeToggle 
+                slot="end" 
+                (ionChange)="toggleTheme($event)"></ion-toggle>
+            </ion-item>
+          </ion-item-group>
+          <ion-item-group>
+            <ion-item-divider color="light">
+              <ion-icon name="key" slot="start" color="primary"></ion-icon>
+              <ion-label>&nbsp;Account</ion-label>
+            </ion-item-divider>
+            <ion-item 
+              id="logout-button" 
+              button 
+              text-center 
+              color="danger" 
+              detail="true" 
+              detailIcon="log-out"
+              (click)="showLogoutAlert()">
+              Logout
+            </ion-item>
+          </ion-item-group>
+        </ion-list>
+      </ion-card-content>
+    </form>
   </ion-card>
-  
+
+  <ion-toolbar color="light" id="copy-toolbar" no-padding>
+
+    <ion-item color="light" no-margin no-padding lines="none" id="copyright-info">
+      <ion-button slot="start" fill="clear" href="/tabs/(settings:tos)">
+        Terms of Service
+      </ion-button>
+
+      <ion-label text-center color="medium"><h6>&copy;&nbsp;Copyright 2018</h6></ion-label>
+
+      <ion-button slot="end" fill="clear" href="/tabs/(settings:privacy)">
+        Privacy Policy
+      </ion-button>
+    </ion-item>
+  </ion-toolbar>
 </ion-content>

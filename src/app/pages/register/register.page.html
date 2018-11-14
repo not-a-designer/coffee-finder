@@ -33,7 +33,12 @@
               [placeholder]="!isAndroid ? 'Password' : ''"
               [pattern]="passwordPattern"
               required></ion-input>
-              <ion-button icon-only slot="end" fill="clear" (click)="togglePasswordVisiblity()">
+              <ion-button 
+                icon-only 
+                slot="end" 
+                fill="clear" 
+                tabindex="-1"
+                (click)="togglePasswordVisiblity()">
                 <ion-icon [name]="passwordVisible ? 'eye-off' :'eye'"></ion-icon>
               </ion-button>
           </ion-item>

@@ -10,9 +10,7 @@ import { map, take, tap }      from 'rxjs/operators';
 import { AuthService }         from '@app-services/auth/auth.service';
 
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class AuthGuard implements CanActivate {
 
   constructor(private auth: AuthService, private router: Router) {}

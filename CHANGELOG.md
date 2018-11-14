@@ -1,14 +1,39 @@
 # Local Coffee Finder Change Log
 
 
+### 0.0.1 11/14/2018 'Twitter authentication added, Auth 90% done'
+
+@ANGULAR/FIRE
+- Authentication - Twitter browser & native login, logout, get twitter user data
+- Authentication - Change password, change email, send email verification
+
+@IONIC-NATIVE
+- HeaderColor
+- Twitter
+- AdMobPro
+
+@IONIC STORAGE
+- Storage service created
+
+#### Features
+- added 'emailVerified: boolean' and 'ProviderId: string' to interface User
+- Password reset, update user password & email
+- show OAuth provider
+- Added Terms of Service and Privacy Policy
+
+#### Notes
+- Comments complete from services/*
+
+
+
 ### 0.0.1 11/13/2018 'Facebook authentication added'
 
 @ANGULAR/FIRE
-- Authentication - Implemented passwordReset, facebook browser & native login, logout, auth error checking
+- Authentication - Facbook browser & native login, logout, check facebook user status
+- Authentication - forgot password, added verfiy email button
 
 @IONIC-NATIVE
 - Facebook
-
 
 
 

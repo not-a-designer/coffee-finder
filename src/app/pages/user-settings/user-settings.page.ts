@@ -1,7 +1,10 @@
-import { Component, OnInit, NgZone }                    from '@angular/core';
+
+import { ChangeDetectorRef, Component, OnInit, NgZone}  from '@angular/core';
 import { Router, ActivatedRoute }                       from '@angular/router';
 
 import { AlertController, LoadingController, Platform } from '@ionic/angular';
+
+import { Observable }                                   from 'rxjs';
 
 import * as moment                                      from 'moment'
 
@@ -18,10 +21,13 @@ import { User }                                         from '@app-interfaces/co
 })
 export class UserSettingsPage implements OnInit {
 
-  user: User = null;
-  changesSaved: boolean;
+  //public user: User = null;
+  user$: Observable<User>;
+  public changesSaved: boolean;
+  public verifyMessageHidden: boolean;
 
   constructor(private router: Router, 
+              private cdr: ChangeDetectorRef,
               private route: ActivatedRoute,
               private zone: NgZone,
               private platform: Platform, 
@@ -31,9 +37,24 @@ export class UserSettingsPage implements OnInit {
               public themes: ThemeService, 
               private users: UserService) { }
 
-  public ngOnInit(): void { 
-    this.user = this.route.snapshot.data['user'];
-    this.changesSaved = true
+  public /*async */ngOnInit(): /*Promise<*/void/*>*/  { 
+    //try {
+      //this.user = this.route.snapshot.data['user'];
+      this.user$ = this.auth.user$;
+    
+      this.changesSaved = true;
+      //console.log(this.user)
+      //const twUser = await this.auth.getTwitterScreenname();
+    /*}
+    catch(e) { console.log('onInit() error :', e)}*/
+  }
+
+  public ionViewWillEnter() {
+    //this.verifyMessageHidden = this.user.emailVerified;
+  }
+
+  public sendVerificationEmail(): void {
+    this.auth.sendEmailVerification();
   }
 
   /*public toggleTheme(event?): void { 
@@ -80,7 +101,7 @@ export class UserSettingsPage implements OnInit {
       });
       await loader.present()
 
-      this.users.updateUserSettings(this.user);
+      this.user$.forEach((user) => this.users.updateUserSettings(user));
 
       this.changesSaved = true;
       await this.router.navigateByUrl('/tabs/(map:map)');
@@ -102,13 +123,26 @@ export class UserSettingsPage implements OnInit {
       this.auth.logout();
       if (this.platform.is('cordova')) {
         this.auth.googleLogout();
-        const fbStatus = await this.auth.getFbLoginStatus();
+        const fbStatus: string = await this.auth.getFbLoginStatus();
         if (fbStatus === 'connected') this.auth.facebookLogout();
       }
       await this.router.navigate(['/']);
       loader.dismiss();
     }
     catch(e) { console.log('doLogout() error: ', e) }
+  }
+
+  public async changePassword() {
+    try { await this.auth.verifyIdentityAlert('updatePassword') }
+    catch(e) { console.log('changePassword() error: ', e) }
+  }
+
+  public async updateEmail() {
+    try { 
+      await this.auth.verifyIdentityAlert('updateEmail');
+      this.cdr.detectChanges();
+  }
+    catch(e) { console.log('updateEmail() error: ', e) }
   }
 
   /** HELPED GETTERS  **/

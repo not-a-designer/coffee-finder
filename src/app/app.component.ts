@@ -1,5 +1,5 @@
-import { Component }                    from '@angular/core';
-import { Router, NavigationEnd, RouterEvent } from '@angular/router';
+import { Component }      from '@angular/core';
+import { Router }         from '@angular/router';
 
 import { Platform, 
          LoadingController, 
@@ -8,11 +8,10 @@ import { Platform,
          ToastController, 
          ActionSheetController, 
          PopoverController, 
-         MenuController}              from '@ionic/angular';
-import { SplashScreen }                 from '@ionic-native/splash-screen/ngx';
-import { StatusBar }                    from '@ionic-native/status-bar/ngx';
-
-import { map, filter }                  from 'rxjs/operators';
+         MenuController}  from '@ionic/angular';
+import { HeaderColor }    from '@ionic-native/header-color/ngx';
+import { SplashScreen }   from '@ionic-native/splash-screen/ngx';
+import { StatusBar }      from '@ionic-native/status-bar/ngx';
 
 
 declare const navigator: any;
@@ -37,26 +36,25 @@ export class AppComponent {
               private toastCtrl: ToastController,
               private router: Router,
               private splashScreen: SplashScreen,
-              private statusBar: StatusBar) {
+              private statusBar: StatusBar,
+              private headerColor: HeaderColor) {
     this.initializeApp();
   }
 
   private async initializeApp(): Promise<void> {
     try {
       await this.platform.ready();
+
       this.statusBar.styleDefault();
       this.splashScreen.hide();
+      this.headerColor.tint('#3880ff');
       this.registerBackButtonAction();
-      this.router.events.pipe(
-        filter((event: RouterEvent) => event instanceof NavigationEnd),
-        map((ev: RouterEvent) => ev.url)
-      ).subscribe((url) => this.finalUrl = url);
 
     }
     catch(e) { console.error('initializeApp() error: ', e) }
   }
 
-  registerBackButtonAction() {
+  private registerBackButtonAction(): void {
     this.platform.backButton.subscribe(async () => {
       // close action sheet
       try {
@@ -100,7 +98,7 @@ export class AppComponent {
           return;
       } 
       catch (e) { console.error('menuCtrl error: ', e) }
-    })
+    });
   }
 
   private async showExitAlert() {

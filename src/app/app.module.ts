@@ -6,13 +6,16 @@ import { BrowserModule }                       from '@angular/platform-browser';
 import { RouteReuseStrategy }                  from '@angular/router';
 
 import { IonicModule, IonicRouteStrategy }     from '@ionic/angular';
+import { IonicStorageModule }                  from '@ionic/storage';
 import { AdMobFree }                           from '@ionic-native/admob-free/ngx';
+//import { AdMobPro }                            from '@ion-native/admob-pro/ngx';
 import { Facebook }                            from '@ionic-native/facebook/ngx';
 import { Geolocation }                         from '@ionic-native/geolocation/ngx';
 import { GooglePlus }                          from '@ionic-native/google-plus/ngx';
+import { HeaderColor }                         from '@ionic-native/header-color/ngx';
 import { SplashScreen }                        from '@ionic-native/splash-screen/ngx';
 import { StatusBar }                           from '@ionic-native/status-bar/ngx';
-
+import { TwitterConnect }                      from '@ionic-native/twitter-connect/ngx';
 import { AgmCoreModule, GoogleMapsAPIWrapper } from '@agm/core';
 
 import { environment }                         from '@environments/environment'
@@ -23,6 +26,7 @@ import { AppComponent }                        from './app.component';
 import { AuthService }                         from '@app-services/auth/auth.service';
 import { AuthGuard }                           from '@app-services/auth/auth.guard';
 import { MapService }                          from '@app-services/map/map.service';
+import { StorageService }                      from '@app-services/storage/storage.service';
 import { ThemeService }                        from '@app-services/theme/theme.service';
 import { UserService }                         from '@app-services/user/user.service';
 
@@ -33,6 +37,7 @@ import { UserService }                         from '@app-services/user/user.ser
   imports: [
     BrowserModule, 
     IonicModule.forRoot(), 
+    IonicStorageModule.forRoot(),
     AngularFireModule.initializeApp(environment.firebase),
     AngularFireAuthModule,
     AngularFirestoreModule,
@@ -50,11 +55,14 @@ import { UserService }                         from '@app-services/user/user.ser
     Geolocation,
     GoogleMapsAPIWrapper,
     GooglePlus,
+    HeaderColor,
     MapService,
-    StatusBar,
     SplashScreen,
+    StatusBar,
+    StorageService,
     ThemeService,
     UserService,
+    TwitterConnect,
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy }
   ],
   

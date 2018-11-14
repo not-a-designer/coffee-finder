@@ -1,5 +1,7 @@
 import { Injectable }      from '@angular/core';
 
+import { Platform }        from '@ionic/angular';
+
 import { Geolocation }     from '@ionic-native/geolocation/ngx';
 
 import { BehaviorSubject } from 'rxjs';
@@ -8,9 +10,7 @@ import { BehaviorSubject } from 'rxjs';
 declare const navigator: any;
 
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class MapService {
 
   private _lat: number;
@@ -27,10 +27,15 @@ export class MapService {
     maximumAge: 0
   };
 
-  constructor(private geolocation: Geolocation) { }
+  constructor(private geolocation: Geolocation, private platform: Platform) { }
 
-  public async getNativePosition() {
+  /**
+   * @public getNativePosition()
+   * - gets current location using native geolocation
+   */
+  public async getNativePosition(): Promise<void> {
     try {
+      await this.platform.ready();
       const position = await this.geolocation.getCurrentPosition(this._geolocationOptions);
       this._lat = position.coords.latitude;
       this._lng = position.coords.longitude;
@@ -44,7 +49,11 @@ export class MapService {
     catch(e) { console.log('native location error: ', e) }
   }
 
-  public async getBrowserPosition() {
+  /**
+   * @public getBrowserPosition()
+   * - gets current position from browser
+   */
+  public async getBrowserPosition(): Promise<void> {
     try { 
       //helper success callback
       const success = (position) => { 
