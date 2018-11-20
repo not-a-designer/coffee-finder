@@ -4,7 +4,7 @@
 
 ### 0.0.1 11/20/2018 'Map UI updates and additions, Foursquare added'
 
-### Features
+#### Features
 - installed node-foursquare
 - 'You are here' marker disctinct from venues
 - Location radius no longer changes with map panning, now a fab + popover
