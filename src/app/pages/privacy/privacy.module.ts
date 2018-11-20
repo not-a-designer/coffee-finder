@@ -1,18 +1,15 @@
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { Routes, RouterModule } from '@angular/router';
+import { NgModule }             from '@angular/core';
+import { RouterModule, Routes } from '@angular/router';
+import { CommonModule }         from '@angular/common';
+import { FormsModule }          from '@angular/forms';
 
-import { IonicModule } from '@ionic/angular';
+import { IonicModule }          from '@ionic/angular';
 
-import { PrivacyPage } from './privacy.page';
+import { PrivacyPage }          from './privacy.page';
 
-const routes: Routes = [
-  {
-    path: '',
-    component: PrivacyPage
-  }
-];
+
+const routes: Routes = [{ path: '', component: PrivacyPage }];
+
 
 @NgModule({
   imports: [
@@ -21,6 +18,11 @@ const routes: Routes = [
     IonicModule,
     RouterModule.forChild(routes)
   ],
-  declarations: [PrivacyPage]
+
+  declarations: [PrivacyPage],
+
+  exports: [ PrivacyPage ],
+
+  entryComponents: [ PrivacyPage ]
 })
 export class PrivacyPageModule {}

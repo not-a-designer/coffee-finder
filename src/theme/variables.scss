@@ -37,7 +37,7 @@
   --ion-color-success-tint: #28e070;
 
   /** warning **/
-  --ion-color-warning: /#ffce00;
+  --ion-color-warning: #ffce00;
   --ion-color-warning-rgb: 255,206,0;
   --ion-color-warning-contrast: #ffffff;
   --ion-color-warning-contrast-rgb: 255,255,255;
@@ -82,28 +82,33 @@
   //Custom transparent reference
   --ion-color-transparent: transparent;
 
-  //app base and contrast
-  //--ion-color-base: var(--ion-color-primary);
-  //--ion-color-contrast: var(--ion-color-dark);
+  //info Window styles
+  .snazzy-info-window {
+    min-width: 400px;
+    width: 400px;
+    max-height: 250px;
 
-  //main background and text colors
- //--ion-background-color: var(--ion-color-light);
-  //--ion-text-color: var(--ion-color-primary);
-  
-  // main toolbar background and text colors
-  /*--ion-toolbar-background: var(--ion-color-primary);
-  --ion-toolbar-color-activated: var(--ion-color-light);
+    .si-float-wrapper {
+      min-width: 400px;
+      width: 400px;
+      max-height: 250px;
+    }
 
-  //tab icon and label color, unselected
-  --ion-tab-bar-color: var(--ion-color-secondary);
-  //tab icon and label color, selected 
-  --ion-tab-bar-color-activated: var(--ion-color-light);
-    //tab bar background color
-  --ion-tab-bar-background: var(--ion-color-primary);
-  // ????
-  //--ion-tab-bar-background-focused: var(--ion-color-success);
+  }
 
-  //main item background colors
-  --ion-item-background: var(--ion-color-light);
-  --ion-item-color: var(--ion-color-dark);*/
+  //infow window popover styles
+  .popover-info-window .popover-content {
+    position: absolute !important;
+    min-width: 400px;
+    width: 400px;
+    height: 160px;
+    bottom: 60px !important;
+  }
+
+  //radius popover styles
+  .popover-radius .popover-content {
+    min-width: 420px;
+    width: 30vw;
+    border-radius: 12px;
+  }
 }

@@ -29,7 +29,8 @@ ion-card {
 #copy-toolbar {
     --border-width: 0;
     bottom: 0;
-    position: absolute;
+    left: 0;
+    position: fixed;
 }
 
 ion-thumbnail, .social-icon {

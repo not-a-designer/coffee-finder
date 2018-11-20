@@ -1,53 +1,89 @@
 <ion-header>
   <ion-toolbar color="primary">
-    <ion-buttons slot="start">
-      <ion-icon name="search"></ion-icon>
-    </ion-buttons>
-
     <ion-title>Find Coffee</ion-title>
-
-    <ion-buttons slot="end">
-      <ion-button (click)="toggleRadius()">
-        <ng-container *ngIf="showRadius">Radius: {{ (radius / 1600) | number: '1.0-2' }}mi</ng-container>
-        <ng-container *ngIf="!showRadius">Change Radius</ng-container>
-        <ion-icon slot="end" [name]="!showRadius ? 'arrow-dropdown' : 'arrow-dropup'"></ion-icon>
-      </ion-button>
-    </ion-buttons>
-  </ion-toolbar>
-  <ion-toolbar color="primary" *ngIf="showRadius">
-    <ion-range 
-      #radiusRange
-      no-padding
-      name="radius"
-      [(ngModel)]="radius"
-      id="radius" 
-      min="1600" 
-      max="16000" 
-      debounce="500"
-      color="light">
-      <ion-icon name="walk" slot="start" padding-end></ion-icon>
-      <ion-icon name="car" slot="end" padding-start></ion-icon>
-    </ion-range>
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
-  <ion-fab horizontal="end" vertical="start" slot="fixed">
-    <ion-fab-button mini (click)="getCurrentLocation()">
+  <ion-fab no-margin horizontal="end" vertical="top" slot="fixed" edge>
+    <ion-fab-button mini color="secondary" (click)="getCurrentLocation()">
       <ion-icon name="locate"></ion-icon>
     </ion-fab-button>
   </ion-fab>
-  <agm-map [latitude]="mapLat" [longitude]="mapLng" [zoom]="mapZoom">
-    <agm-marker [latitude]="mapLat" [longitude]="mapLng" markerDragable="false"></agm-marker>
+
+  <ion-fab horizontal="end" vertical="top" slot="fixed" margin-top>
+    <ion-fab-button mini color="secondary" (click)="showRadiusPopover($event)">
+      <ion-icon name="options"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+  
+
+  <agm-map 
+    #map
+    [latitude]="mapLat" 
+    [longitude]="mapLng" 
+    [zoom]="mapZoom" 
+    usePanning="true"
+    clickableIcons="false"
+    disableDefaultUI="true"
+    (mapClick)="selectedVenue = null">
+    
+   
     <agm-circle 
       [radius]="radius" 
-      [latitude]="mapLat" 
-      [longitude]="mapLng" 
+      [latitude]="currentLat" 
+      [longitude]="currentLng" 
       fillOpacity="0.35" 
       fillColor="#3171e0" 
       strokeWeight="2" 
       strokePosition="0"
       strokeColor="#3171e0"
-      strokeOpacity="1"></agm-circle>
+      strokeOpacity="1">
+      <agm-marker 
+        [latitude]="currentLat" 
+        [longitude]="currentLng" 
+        iconUrl="http://maps.google.com/mapfiles/ms/micons/green-dot.png"
+        markerDragable="false"></agm-marker>
+    </agm-circle>
+
+    <agm-marker 
+      *ngFor="let marker of markers; index as i" 
+      [latitude]="marker.lat" 
+      [longitude]="marker.lng" 
+      markerDragable="false"
+      (markerClick)="selectMarker($event, i)">
+
+      
+
+      
+      <!--<agm-snazzy-info-window 
+        #infoWindow
+        [maxWidth]="800"
+        [latitude]="selectedVenue?.location.lat"
+        [longitude]="selectedVenue?.location.lng"
+        closeOnMapClick="true"
+        closeWhenOthersOpen="true"
+        showCloseButton="false"
+        openOnMarkerClick="true"
+        panOnOpen="true"
+        padding="0"
+        wrapperClass="snazzy-info-window">
+        <ng-template>
+         <venue-details-card [venue]="selectedVenue"></venue-details-card>
+        </ng-template>
+      </agm-snazzy-info-window>-->
+    </agm-marker>
   </agm-map>
+
+  <venue-details-card 
+    *ngIf="selectedVenue" 
+    [venue]="selectedVenue"
+    [user]="user"
+    (toggleFavorite)="toggleFavorite($event)">
+    <ion-fab id="close-info-window" horizontal="end" vertical="top" no-margin>
+      <ion-button size="small" fill="clear" icon-only (click)="this.selectedVenue = null">
+        <ion-icon color="light" name="close"></ion-icon>
+      </ion-button>
+    </ion-fab>
+  </venue-details-card>
 </ion-content>

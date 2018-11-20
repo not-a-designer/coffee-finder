@@ -1,5 +1,5 @@
-import { Component }      from '@angular/core';
-import { Router }         from '@angular/router';
+import { Component }     from '@angular/core';
+import { Router }        from '@angular/router';
 
 import { Platform, 
          LoadingController, 
@@ -8,10 +8,10 @@ import { Platform,
          ToastController, 
          ActionSheetController, 
          PopoverController, 
-         MenuController}  from '@ionic/angular';
-import { HeaderColor }    from '@ionic-native/header-color/ngx';
-import { SplashScreen }   from '@ionic-native/splash-screen/ngx';
-import { StatusBar }      from '@ionic-native/status-bar/ngx';
+         MenuController} from '@ionic/angular';
+import { HeaderColor }   from '@ionic-native/header-color/ngx';
+import { SplashScreen }  from '@ionic-native/splash-screen/ngx';
+import { StatusBar }     from '@ionic-native/status-bar/ngx';
 
 
 declare const navigator: any;
@@ -24,84 +24,70 @@ declare const navigator: any;
 })
 export class AppComponent {
 
-  finalUrl: string;
-
-  constructor(private platform: Platform,
-              private actionsheetCtrl: ActionSheetController,
+  constructor(private actionsheetCtrl: ActionSheetController,
               private alertCtrl: AlertController,
+              private headerColor: HeaderColor,
               private modalCtrl: ModalController,
               private menuCtrl: MenuController,
+              private platform: Platform,
               private popoverCtrl: PopoverController,
               private loadingCtrl: LoadingController,
-              private toastCtrl: ToastController,
               private router: Router,
               private splashScreen: SplashScreen,
               private statusBar: StatusBar,
-              private headerColor: HeaderColor) {
+              private toastCtrl: ToastController) { 
+                
     this.initializeApp();
   }
 
   private async initializeApp(): Promise<void> {
     try {
       await this.platform.ready();
-
-      this.statusBar.styleDefault();
-      this.splashScreen.hide();
-      this.headerColor.tint('#3880ff');
-      this.registerBackButtonAction();
-
+      //prevent errors if not cordova
+      if (this.platform.is('cordova')) {
+        this.statusBar.styleDefault();
+        this.splashScreen.hide();
+        this.headerColor.tint('#3880ff');
+        this.registerBackButtonAction();
+      }
     }
     catch(e) { console.error('initializeApp() error: ', e) }
   }
 
   private registerBackButtonAction(): void {
     this.platform.backButton.subscribe(async () => {
-      // close action sheet
       try {
-        const actionsheet = await this.actionsheetCtrl.getTop();
-        if (actionsheet) actionsheet.dismiss();
-        return;
+        //check for overlays
+        const overlay: any = await (this.loadingCtrl.getTop() ||
+          this.toastCtrl.getTop() ||
+          this.actionsheetCtrl.getTop() ||
+          this.alertCtrl.getTop() ||
+          this.popoverCtrl.getTop() ||
+          this.modalCtrl.getTop());
+
+        if (overlay) overlay.dismiss();
+        else {
+          //check for sideMenu
+          const menu = await this.menuCtrl.getOpen();
+          if (menu !== null) menu.close();
+          else {
+            //redirect urls
+            if (this.router.url.includes('login') || 
+              this.router.url.includes('register') || 
+              this.router.url.includes('tos') || 
+              this.router.url.includes('privacy')) this.router.navigateByUrl('/tabs/(settings:settings)');
+            if (this.router.url.includes('settings')) this.router.navigateByUrl('/tabs/(map:map)');
+            if (this.router.url.includes('map')) this.router.navigateByUrl('/tabs/(home:home)');
+            //show quitAlert
+            else this.showExitAlert;
+          }
+        }
       }
-      catch (e) {console.error('actionsheetCtrl error: ', e)}
-      // close popover
-      try {
-        const popover = await this.popoverCtrl.getTop();
-        if (popover) popover.dismiss();
-        return;
-      }
-      catch (e) { console.error('popoverCtrl error: ', e) }
-      // close modal
-      try {
-          const modal = await this.modalCtrl.getTop();
-          if (modal) modal.dismiss();
-          return;
-      }
-      catch (e) {console.error('modalCtrl error: ', e) }
-      // closes loading
-      try {
-        const loader = await this.loadingCtrl.getTop();
-        if (loader) loader.dismiss();
-        return;
-      } 
-      catch (e) { console.error('loadingCtrl error: ', e) }
-      //closes toast
-      try {
-        const toast = await this.toastCtrl.getTop();
-        if (toast) toast.dismiss();
-        return;
-      } 
-      catch (e) { console.error('menuCtrl error: ', e) }
-      // close side menus
-      try {
-          const sideMenu = await this.menuCtrl.getOpen();
-          if (sideMenu !== null) sideMenu.close();
-          return;
-      } 
-      catch (e) { console.error('menuCtrl error: ', e) }
+      catch(e) { console.log(e) }
     });
   }
 
-  private async showExitAlert() {
+  private async showExitAlert(): Promise<void> {
     try {
       const exitAlert = await this.alertCtrl.create({
         header: 'Coffee Finder',
@@ -113,13 +99,15 @@ export class AppComponent {
             handler: () => console.log('cancel quit')
           }, {
             text: 'Exit',
-            handler: () => console.log('TODO Exit')
+            handler: () => {
+              console.log('TODO Exit');
+              navigator['app]'].exitApp();
+            }
           }
         ]
-      })
+      });
+      await exitAlert.present();
     }
     catch(e) { console.error('showExitAlert() error: ', e) }
   }
-
-
 }

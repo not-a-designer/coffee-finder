@@ -1,12 +1,12 @@
-import { NgModule }                   from '@angular/core';
-import { CommonModule }               from '@angular/common';
-import { FormsModule }                from '@angular/forms';
-import { Routes, RouterModule }       from '@angular/router';
+import { NgModule }             from '@angular/core';
+import { CommonModule }         from '@angular/common';
+import { FormsModule }          from '@angular/forms';
+import { Routes, RouterModule } from '@angular/router';
 
-import { IonicModule }                from '@ionic/angular';
+import { IonicModule }          from '@ionic/angular';
 
-import { UserSettingsPage }           from './user-settings.page';
-import { PipesModule }                from '@app-pipes/pipes.module'; 
+import { UserSettingsPage }     from './user-settings.page';
+import { PipesModule }          from '@app-pipes/pipes.module'; 
 
 
 const routes: Routes = [{ path: '', component: UserSettingsPage }];

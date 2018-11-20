@@ -1,18 +1,15 @@
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { Routes, RouterModule } from '@angular/router';
+import { NgModule }             from '@angular/core';
+import { RouterModule, Routes } from '@angular/router';
+import { CommonModule }         from '@angular/common';
+import { FormsModule }          from '@angular/forms';
 
-import { IonicModule } from '@ionic/angular';
+import { IonicModule }          from '@ionic/angular';
 
-import { TosPage } from './tos.page';
+import { TosPage }              from './tos.page';
 
-const routes: Routes = [
-  {
-    path: '',
-    component: TosPage
-  }
-];
+
+const routes: Routes = [{ path: '', component: TosPage }];
+
 
 @NgModule({
   imports: [
@@ -21,6 +18,11 @@ const routes: Routes = [
     IonicModule,
     RouterModule.forChild(routes)
   ],
-  declarations: [TosPage]
+
+  declarations: [TosPage],
+
+  exports: [ TosPage ],
+
+  entryComponents: [ TosPage ]
 })
 export class TosPageModule {}

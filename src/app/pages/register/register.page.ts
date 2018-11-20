@@ -1,12 +1,12 @@
-import { Component, OnInit }           from '@angular/core';
-import { NgForm }                      from '@angular/forms';
-import { Router }                      from '@angular/router';
+import { Component, OnInit }                      from '@angular/core';
+import { NgForm }                                 from '@angular/forms';
+import { Router }                                 from '@angular/router';
 
-import { LoadingController, Platform } from '@ionic/angular';
+import { LoadingController, Platform }            from '@ionic/angular';
 
 import { AuthService, EMAIL_REGEXP, PASS_REGEXP } from '@app-services/auth/auth.service';
-import { UserService }                 from '@app-services/user/user.service';
-
+import { UserService }                            from '@app-services/user/user.service';
+  
 
 @Component({
   selector: 'app-register',
@@ -50,25 +50,6 @@ export class RegisterPage implements OnInit {
       }
     }
     catch(e) { if (loader != undefined) loader.dismiss() }
-  }
-
-  private checkEmail(email: string): boolean {
-    const e: string = email.trim();
-    console.log('trimmed: ', e)
-
-    if (email.length < 8) return false;
-    else if (!EMAIL_REGEXP.test(e)) return false;
-    else return true;
-  }
-
-  private checkPassword(password: string, confirm: string): boolean {
-    const p: string = password.trim();
-    const c: string = confirm.trim();
-    console.log('trimmed: ', {p, c})
-
-    if (!PASS_REGEXP.test(p)) return false;
-    else if (c !== p) return false;
-    else return true;
   }
 
 

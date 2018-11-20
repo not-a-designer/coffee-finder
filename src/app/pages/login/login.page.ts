@@ -1,17 +1,17 @@
-import { Component, OnInit }           from '@angular/core';
-import { NgForm }                      from '@angular/forms';
-import { Router }                      from '@angular/router';
+import { Component, OnInit }                      from '@angular/core';
+import { NgForm }                                 from '@angular/forms';
+import { Router }                                 from '@angular/router';
 
-import { LoadingController, Platform } from '@ionic/angular';
+import { LoadingController, Platform }            from '@ionic/angular';
 
 import { AuthService, EMAIL_REGEXP, PASS_REGEXP } from '@app-services/auth/auth.service';
-import { UserService }                 from '@app-services/user/user.service';
+import { UserService }                            from '@app-services/user/user.service';
 
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.page.html',
-  styleUrls: ['./login.page.scss'],
+  styleUrls: ['./login.page.scss']
 })
 export class LoginPage implements OnInit {
 
@@ -95,12 +95,11 @@ export class LoginPage implements OnInit {
       }
     }
     catch(e) { 
-      if(loader != undefined) loader.dismiss();
-      //console.log('doLogin() error: ', e);
+      if (loader != undefined) loader.dismiss();
     }
   }
 
-  public async doPasswordReset() {
+  public async doPasswordReset(): Promise<void> {
     try { await this.auth.showResetPasswordAlert() }
     catch(e) { console.error('doPasswordReset() error: ', e) }
   }

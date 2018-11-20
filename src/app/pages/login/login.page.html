@@ -8,7 +8,7 @@
       <ion-card-content text-center>
         <ion-list color="light" text-center>
           <ion-item>
-            <ion-label *ngIf="isAndroid" floating>Email</ion-label>
+            <ion-label *ngIf="isAndroid" position="floating">Email</ion-label>
             <ion-input 
               type="email" 
               ngModel
@@ -20,7 +20,7 @@
           </ion-item>
 
           <ion-item>
-            <ion-label *ngIf="isAndroid" floating>Password</ion-label>
+            <ion-label *ngIf="isAndroid" position="floating">Password</ion-label>
             <ion-input 
               [type]="passwordVisible ? 'text' : 'password'" 
               min="6"

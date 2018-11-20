@@ -5,6 +5,7 @@ import { FormsModule }                      from '@angular/forms';
 import { IonicModule }                      from '@ionic/angular';
 
 import { AgmCoreModule }                    from '@agm/core';
+import { AgmSnazzyInfoWindowModule}         from '@agm/snazzy-info-window';
 
 import { TabsPageRoutingModule }            from './tabs.router.module';
 
@@ -26,9 +27,10 @@ import { TosPageModule }                    from '@app-pages/tos/tos.module';
     FormsModule,
     TabsPageRoutingModule,
     AgmCoreModule.forRoot({ apiKey: environment.firebase.apiKey }),
+    AgmSnazzyInfoWindowModule,
+    HomePageModule,
     CoffeeMapPageModule,
     UserSettingsPageModule,
-    HomePageModule,
     LoginPageModule,
     RegisterPageModule,
     PrivacyPageModule,

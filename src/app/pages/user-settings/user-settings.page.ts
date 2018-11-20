@@ -1,10 +1,11 @@
 
 import { ChangeDetectorRef, Component, OnInit, NgZone}  from '@angular/core';
-import { Router, ActivatedRoute }                       from '@angular/router';
+import { Router }                                       from '@angular/router';
 
-import { AlertController, LoadingController, Platform } from '@ionic/angular';
+import { AlertController, LoadingController, Platform, ToastController } from '@ionic/angular';
 
 import { Observable }                                   from 'rxjs';
+import { take }                                         from 'rxjs/operators';
 
 import * as moment                                      from 'moment'
 
@@ -12,6 +13,7 @@ import { AuthService }                                  from '@app-services/auth
 import { ThemeService }                                 from '@app-services/theme/theme.service';
 import { UserService }                                  from '@app-services/user/user.service';
 import { User }                                         from '@app-interfaces/coffee-user';
+import { Venue } from '@app-interfaces/foursquare/venue';
 
 
 @Component({
@@ -22,35 +24,24 @@ import { User }                                         from '@app-interfaces/co
 export class UserSettingsPage implements OnInit {
 
   //public user: User = null;
-  user$: Observable<User>;
+  user: User;
   public changesSaved: boolean;
   public verifyMessageHidden: boolean;
 
   constructor(private router: Router, 
               private cdr: ChangeDetectorRef,
-              private route: ActivatedRoute,
               private zone: NgZone,
               private platform: Platform, 
               private alertCtrl: AlertController,
               private loadingCtrl: LoadingController,
+              private toastCtrl: ToastController,
               private auth: AuthService, 
               public themes: ThemeService, 
               private users: UserService) { }
 
-  public /*async */ngOnInit(): /*Promise<*/void/*>*/  { 
-    //try {
-      //this.user = this.route.snapshot.data['user'];
-      this.user$ = this.auth.user$;
-    
+  public ngOnInit(): void  { 
+      this.auth.user$.subscribe((user) => this.user = user);
       this.changesSaved = true;
-      //console.log(this.user)
-      //const twUser = await this.auth.getTwitterScreenname();
-    /*}
-    catch(e) { console.log('onInit() error :', e)}*/
-  }
-
-  public ionViewWillEnter() {
-    //this.verifyMessageHidden = this.user.emailVerified;
   }
 
   public sendVerificationEmail(): void {
@@ -99,9 +90,9 @@ export class UserSettingsPage implements OnInit {
         message: 'Updating settings...',
         duration: 750
       });
-      await loader.present()
+      await loader.present();
 
-      this.user$.forEach((user) => this.users.updateUserSettings(user));
+      this.users.updateUserSettings(this.user);
 
       this.changesSaved = true;
       await this.router.navigateByUrl('/tabs/(map:map)');
@@ -132,17 +123,54 @@ export class UserSettingsPage implements OnInit {
     catch(e) { console.log('doLogout() error: ', e) }
   }
 
-  public async changePassword() {
+  public async changePassword(): Promise<void> {
     try { await this.auth.verifyIdentityAlert('updatePassword') }
     catch(e) { console.log('changePassword() error: ', e) }
   }
 
-  public async updateEmail() {
+  public async updateEmail(): Promise<void> {
     try { 
       await this.auth.verifyIdentityAlert('updateEmail');
       this.cdr.detectChanges();
   }
     catch(e) { console.log('updateEmail() error: ', e) }
+  }
+
+  public async showRemoveFavoriteAlert(): Promise<void> {
+    try {
+      const alert = await this.alertCtrl.create({
+        header: 'remove Favorite',
+        message: 'Are you sure you want to remove this location as your favorite?',
+        buttons: [{
+          text: 'Cancel',
+          role: 'cancel',
+          handler: () => console.log('cancel, keep favorite')
+        }, {
+          text: 'Remove',
+          role: 'destructive',
+          handler: () => {
+            const prevLocation: Venue = this.user.favorite;
+            this.user.favorite = null;
+            this.users.updateUserSettings(this.user);
+            this.showFavoriteToast(`${prevLocation.name} has been removed as your favorite!`);
+          }
+        }]
+      });
+      await alert.present();
+    }
+    catch(e) { console.log(e) }
+  }
+
+  private async showFavoriteToast(msg: string): Promise<void> {
+    try {
+      const toast = await this.toastCtrl.create({
+        message: msg,
+        duration: 2000,
+        position: 'middle'
+      });
+      await toast.present();
+    }
+    catch(e) { console.log(e) }
   }
 
   /** HELPED GETTERS  **/

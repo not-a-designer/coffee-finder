@@ -1,0 +1,16 @@
+<ion-range 
+  #radiusRange 
+  name="radius" 
+  [value]="radius" 
+  id="radius" 
+  debounce="400" 
+  step="400" 
+  snaps="true" 
+  min="1600" 
+  max="8000" 
+  color="primary" 
+  (ionChange)="updateRadius($event)">  
+  
+  <ion-label slot="start" margin-end>1 MI</ion-label>    
+  <ion-label slot="end" padding-start>5 MI</ion-label>    
+</ion-range>

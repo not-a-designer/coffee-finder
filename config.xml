@@ -104,4 +104,7 @@
     <plugin name="cordova-sqlite-storage" spec="2.5.1" />
     <plugin name="cordova-plugin-headercolor" spec="1.0.0" />
     <plugin name="cordova-plugin-admobpro" spec="2.35.3" />
+    <plugin name="cordova-plugin-firebase-authentication" spec="1.0.1">
+        <variable name="FIREBASE_AUTH_VERSION" value="16.0.5" />
+    </plugin>
 </widget>

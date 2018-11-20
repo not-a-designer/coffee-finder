@@ -1,0 +1,8 @@
+<ion-row no-padding align-items-center>
+  <ion-col no-padding *ngFor="let star of starsArray">
+    <ion-icon [color]="starColor" [name]="star.icon"></ion-icon>
+  </ion-col>
+  <ion-col no-padding>
+    <h6>&nbsp;({{ rating }})</h6>
+  </ion-col>
+</ion-row>

@@ -1,6 +1,20 @@
 # Local Coffee Finder Change Log
 
 
+
+### 0.0.1 11/20/2018 'Map UI updates and additions, Foursquare added'
+
+### Features
+- installed node-foursquare
+- 'You are here' marker disctinct from venues
+- Location radius no longer changes with map panning, now a fab + popover
+- User interface 'favorite<Venue>' property added
+- <tab-bar> added to info window
+- Add or remove a favorite venue, disabled if no user
+- Favorite venue added to user-settings page, with edit, remove and add options
+
+
+
 ### 0.0.1 11/14/2018 'Twitter authentication added, Auth 90% done'
 
 @ANGULAR/FIRE

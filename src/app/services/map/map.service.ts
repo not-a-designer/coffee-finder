@@ -1,7 +1,8 @@
 import { Injectable }      from '@angular/core';
 
-import { Platform }        from '@ionic/angular';
+import { GoogleMapsAPIWrapper } from '@agm/core/services';
 
+import { Platform }        from '@ionic/angular';
 import { Geolocation }     from '@ionic-native/geolocation/ngx';
 
 import { BehaviorSubject } from 'rxjs';
@@ -27,7 +28,7 @@ export class MapService {
     maximumAge: 0
   };
 
-  constructor(private geolocation: Geolocation, private platform: Platform) { }
+  constructor(private geolocation: Geolocation, private platform: Platform, private mapsAPIWrapper: GoogleMapsAPIWrapper) { }
 
   /**
    * @public getNativePosition()
@@ -75,4 +76,17 @@ export class MapService {
     }
     catch(e) { console.log('navigator error: ', e) }
   }
+
+  /**
+   * @public panTo()
+   * - recenters map to given location
+   * @param lat number  
+   * @param lng number
+   * @param zoom number
+   */
+  public panTo(lat: number, lng: number, zoom?: number): void {
+    this.mapsAPIWrapper.panTo({ lat: lat, lng: lng });
+  }
+
+  
 }
