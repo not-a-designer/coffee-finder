@@ -16,11 +16,17 @@ import * as firebase                              from 'firebase/app';
 
 import { environment }                            from '@environments/environment';
 import { UserService }                            from '@app-services/user/user.service';
-import { User }                                   from '@app-interfaces/coffee-user';
+import { CoffeeUser }                             from '@app-interfaces/coffee-user';
 
 
 export const EMAIL_REGEXP: RegExp = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 export const PASS_REGEXP: RegExp = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,16}$/;
+export const SOCIAL_MEDIA: Array<{label: string; providerId: string; icon: string}> = [
+  { label: 'Facebook', providerId: 'facebook.com', icon: 'https://upload.wikimedia.org/wikipedia/commons/c/c2/F_icon.svg' }, 
+  { label: 'Email', providerId: 'password', icon: 'mail' },
+  { label: 'Google', providerId: 'google.com', icon: 'https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg' },
+  { label: 'Twitter', providerId: 'twitter.com', icon: 'https://upload.wikimedia.org/wikipedia/fr/c/c8/Twitter_Bird.svg' }
+];
 
 interface TwitterUserData {
   user_id: string|number;
@@ -59,7 +65,7 @@ export class AuthService {
    * @public user$ 
    * @returns Observable<User>
    */
-  get user$(): Observable<User> { 
+  get user$(): Observable<CoffeeUser> { 
     return this.firebaseUser$.pipe(
         switchMap((u: firebase.User) => {
           if (u) return this.users.getUser(u.uid);
@@ -113,7 +119,7 @@ export class AuthService {
     try { return await this.afAuth.auth.signInAndRetrieveDataWithEmailAndPassword(email, password) }
     catch(e) { 
       console.log(e.code);
-      await this.showErrorAlert(e);
+      this.showErrorAlert(e);
       console.log('emailLogin() error: ', e) 
     }
   }
@@ -171,7 +177,7 @@ export class AuthService {
     try {
       const res: FacebookLoginResponse = await this.fb.login(['email', 'public_profile', 'user_friends']);
       if (res.status === 'connected') {
-        const credential = firebase.auth.FacebookAuthProvider.credential(res.authResponse.accessToken)
+        const credential = firebase.auth.FacebookAuthProvider.credential(res.authResponse.accessToken);
         return await this.afAuth.auth.signInAndRetrieveDataWithCredential(credential);
       }
     }
@@ -212,9 +218,9 @@ export class AuthService {
    * - if successful, returns a firebase authentication credential
    *  @returns Promise<firebase.auth.UserCredential>
    */
-  public async browserSocialLogin(network: string): Promise<firebase.auth.UserCredential> {
+  public async browserSocialLogin(providerId: string): Promise<firebase.auth.UserCredential> {
     try {
-      const provider = this.determineProvider(network);
+      const provider = this.determineProvider(providerId);
       return await this.afAuth.auth.signInWithPopup(provider);
     }
     catch(e) { 
@@ -235,7 +241,7 @@ export class AuthService {
    * - if the email is valid AngularFireAuth will send a reset email
    * @returns Promise<void>
    */
-  public async showResetPasswordAlert(): Promise<void> {
+  /*public async showResetPasswordAlert(): Promise<void> {
     try {
       const resetAlert = await this.alertCtrl.create({
         header: 'Reset Password',
@@ -276,111 +282,47 @@ export class AuthService {
       console.log(e.code);
       await this.showErrorAlert(e);
       console.log('showResetPasswordAlert() error: ', e) }
-  }
+  }*/
 
-  /**
-   * @public verifyIdentityAlert()
-   * - Takes type parameter to call password or email update after confirming you identity
-   * @param type string
-   */
-  public async verifyIdentityAlert(type: string): Promise<void> {
+  public async reauthenticateWithCredential(password: string): Promise<firebase.auth.UserCredential> {
     try {
-      const oldPassword = await this.alertCtrl.create({
-        header: 'Confirm Identity',
-        message: 'Enter you current password',
-        inputs: [{
-          name: 'password',
-          type: 'password',
-          placeholder: 'Current password'
-        }],
-        buttons: [{
-          text: 'Cancel',
-          role: 'cancel',
-          handler: () => console.log('password change cancelled')
-        }, {
-          text: 'Next',
-          handler: (async (data) => {
-            try {
-              if (data.password) {
-                if (type === 'updatePassword') this.showNewPasswordAlert(data.password);
-                if (type === 'updateEmail') this.showUpdateEmailAlert(data.password);
-              }
-              else await this.passwordChangeErrorAlert('Your current password is required');
-            }
-            catch(e) { 
-              console.log(e.code);
-              await this.showErrorAlert(e);
-              console.log('update email handler error: ', e);
-            }
-          })
-        }]
-      });
-      await oldPassword.present();
-    }
-    catch(e) { 
-      console.log(e.code);
-      await this.showErrorAlert(e);
-      console.log('verifyIdentityAlert() error: ', e);
-    }
-  }
-
-  
-
-  /**
-   * @public sendEmailVerification()
-   * @param user firebase.User
-   * @returns Promise<void>
-   */
-  public async sendEmailVerification(): Promise<void> {
-    try {
-      if (this.afAuth.auth.currentUser != null || this.afAuth.auth.currentUser != undefined) {
-        const u = this.afAuth.auth.currentUser;
-        if (!u.emailVerified) {
-          await u.sendEmailVerification();
-          await this.verificationEmailToast(u.email);
-        }
+      return await this.afAuth.auth.currentUser.reauthenticateAndRetrieveDataWithCredential(
+        firebase.auth.EmailAuthProvider.credential(this.afAuth.auth.currentUser.email, password));
       }
+      catch(e) {
+        console.log(e.code);
+        await this.showErrorAlert(e);
+        console.log('reauthenticationWithCredential() error: ', e);
+      }
+    }
+
+
+  public async reauthenticateWithPopup(providerId: string): Promise<firebase.auth.UserCredential> {
+    try {
+      const provider = this.determineProvider(providerId);
+      return await this.afAuth.auth.currentUser.reauthenticateWithPopup(provider);
     }
     catch(e) {
       console.log(e.code);
       await this.showErrorAlert(e);
-      console.log('sendEmailVerification() error: ', e);
+      console.log('reauthenticateWithPopup() error: ', e);
     }
   }
 
-  
-  /*********************************************************************/
-  /**                         PRIVATE METHODS                         **/
-  /*********************************************************************/
-  /**
-   * @private determineProvider()
-   * - used by browserSocialLogin() to get appropriate AuthProvider
-   * @param provider string
-   * @returns firebase.auth.AuthProvider
-   */
-  private determineProvider(provider: string): firebase.auth.AuthProvider {
-    switch(provider) {
-      case 'facebook': return new firebase.auth.FacebookAuthProvider();
-      case 'twitter': return new firebase.auth.TwitterAuthProvider();
-      //Default to google provider
-      default: return new firebase.auth.GoogleAuthProvider();
-    }
-  }
 
   /**
-   * @private resetPassword()
+   * @public resetPassword()
    * - used by showResetPasswordAlert() to send email when the Alert is confirmed
    * @param email 
    * @returns Promise<void>
    */
-  private async resetPassword(email: string): Promise<void> {
+  public async resetPassword(email: string): Promise<void> {
     try { 
-      const actionCodes: firebase.auth.ActionCodeSettings = {
+      /*const actionCodes: firebase.auth.ActionCodeSettings = {
         url: 'local-coffee-finder-dev.firebaseapp.com',
         iOS: { bundleId: 'com.spectral.localcoffeefinder' },
         android: { packageName: 'com.spectral.localcoffeefinder' }
-      };
-
+      };*/
       return await this.afAuth.auth.sendPasswordResetEmail(email);
     }
     catch(e) {
@@ -389,23 +331,100 @@ export class AuthService {
       console.error('resetPassword() error: ', e) 
     }
   }
-
+  
 
   /**
-   * passwordResetSuccessAlert()
-   * - presents an Alert to notify user that a password reset link has been sent
-   * @param email string
+   * @public sendEmailVerification()
+   * @param user firebase.User
+   * @returns Promise<void>
    */
-  private async passwordResetSuccessAlert(email: string): Promise<void> {
-    try {
-      const successAlert = await this.alertCtrl.create({
-        header: 'Password Reset',
-        message: `Please follow the link sent to ${email} to reset your password`,
-        buttons: ['OK']
-      });
-      await successAlert.present();
+  public async sendEmailVerification(): Promise<void> {
+    try { return await this.afAuth.auth.currentUser.sendEmailVerification() }
+    catch(e) {
+      console.log(e.code);
+      await this.showErrorAlert(e);
+      console.log('sendEmailVerification() error: ', e);
     }
-    catch(e) { console.log('passwordResetAlert() error: ', e) }
+  }
+
+  public async linkAccount(providerId: string) {
+    try {
+      const currentUser = this.afAuth.auth.currentUser;
+      const provider = this.determineProvider(providerId);
+      return await currentUser.linkWithPopup(provider);
+    }
+    catch(e) {
+      console.log(e.code);
+      await this.showErrorAlert(e);
+      console.log('linkAccount() error: ', e);
+    }
+  }
+
+  public async linkEmail(email: string, password: string): Promise<firebase.auth.UserCredential> {
+    try {
+      const currentUser = this.afAuth.auth.currentUser;
+      const emailCredential = firebase.auth.EmailAuthProvider.credential(email, password);
+      return await currentUser.linkAndRetrieveDataWithCredential(emailCredential);
+    }
+    catch(e) {
+      console.log(e.code);
+      await this.showErrorAlert(e);
+      console.log('linkEmail() error: ', e);
+    }
+  }
+
+  public async unlinkAccount(providerId: string): Promise<firebase.User> {
+    try {
+      const currentUser = this.afAuth.auth.currentUser;
+      return await currentUser.unlink(providerId);     
+    }
+    catch(e) {
+      console.log(e.code);
+      await this.showErrorAlert(e);
+      console.log('unlinkAccount() error: ', e);
+    }
+  }
+
+  public async updatePassword(newPassword: string): Promise<void> {
+    try { await this.afAuth.auth.currentUser.updatePassword(newPassword) }
+    catch(e) {
+      console.log(e.code);
+      await this.showErrorAlert(e);
+      console.log('updatePassword() error: ', e);
+    }
+  }
+
+  public async updateEmail(newEmail: string): Promise<void> {
+    try {
+      const currentUser = this.afAuth.auth.currentUser
+      await this.afAuth.auth.currentUser.updateEmail(newEmail);
+      this.users.updateUser(currentUser);
+      this.successToast('Email was successfully updated');
+    }  
+    catch(e) {
+      console.log(e.code);
+      await this.showErrorAlert(e);
+      console.log('updateEmail() error: ', e);
+    }
+  }
+
+
+  /*********************************************************************/
+  /**                         PRIVATE METHODS                         **/
+  /*********************************************************************/
+  /**
+   * @public determineProvider()
+   * - used by browserSocialLogin() to get appropriate AuthProvider
+   * @param provider string
+   * @returns firebase.auth.AuthProvider
+   */
+  private determineProvider(providerId: string): firebase.auth.AuthProvider {
+    switch(providerId) {
+      case 'facebook.com': return new firebase.auth.FacebookAuthProvider();
+      case 'twitter.com': return new firebase.auth.TwitterAuthProvider();
+      case 'google.com': return new firebase.auth.GoogleAuthProvider();
+      case 'password': return new firebase.auth.EmailAuthProvider();
+    }
   }
 
   /**
@@ -465,37 +484,16 @@ export class AuthService {
     }
     catch(e) { console.error('showErrorAlert() error: ', e) }
   }
-
-  /**
-   * @private verificationEmailToast()
-   * - sends an verification link to user's email
-   * - presents toast on success
-   * @param email string
-   */
-  private async verificationEmailToast(email: string): Promise<void> {
-    try {
-      console.log('verification email sent');
-      const verifyToast = await this.toastCtrl.create({
-        message: `Please check your ${email} inbox to verify you account`,
-        position: 'middle',
-        duration: 2500
-      });
-      await verifyToast.present();
-    }
-    catch(e) { console.log('verificationEmailToast() error: ', e) }
-  }
-
+  
   /**
    * @private successToast()
    * - Presents a success toast for updating password or email
    * @param type string
    */
-  private async successToast(type: string): Promise<void> {
+  private async successToast(msg: string): Promise<void> {
     try {
-      const newType: string = type;
-      newType[0].toUpperCase;
       const successToast = await this.toastCtrl.create({
-        message: `${newType} was successfully changed`,
+        message: msg,
         position: 'middle',
         duration: 2500
       });
@@ -504,131 +502,7 @@ export class AuthService {
     catch(e) { console.log('passwordSuccessToast error: ', e) }
   }
 
-  /**
-   * passwordChangeErrorAlert()
-   * @param msg string
-   */
-  private async passwordChangeErrorAlert(msg: string): Promise<void> {
-    try {
-      const errorAlert = await this.alertCtrl.create({
-        header: 'Password Change Error',
-        message: msg,
-        buttons: ['OK']
-      });
-      await errorAlert.present();
-    }
-    catch(e) { console.log('passwordErrorToast error: ', e) }
-  }
 
-  /**
-   * showNewPasswordAlert()
-   * - presents an ALert to accept a new password and confirmation
-   * - updates user password if new passwords are valid
-   * @param odlPassword: string
-   */
-  private async showNewPasswordAlert(oldPassword: string): Promise<void> {
-    try {
-      const confirmPasswordAlert = await this.alertCtrl.create({
-        header: 'Change Password',
-        message: 'Enter new password',
-        inputs: [{
-          name: 'password',
-          type: 'password',
-          placeholder: 'New password',
-        }, {
-          name: 'confirm',
-          type: 'password',
-          placeholder: 'Confirm password',
-        }],
-        buttons: [{
-          text: 'Cancel',
-          role: 'cancel',
-          handler: () => console.log('cancel password change')
-        }, {
-          text: 'Confirm',
-          handler: (async (data) => {
-            try {
-              if (data.password && data.confirm) {
-                if (PASS_REGEXP.test(data.password)) {
-                  if (data.password === data.confirm) {
-                    const credential = await this.afAuth.auth.currentUser.reauthenticateAndRetrieveDataWithCredential(
-                      firebase.auth.EmailAuthProvider.credential(this.afAuth.auth.currentUser.email, oldPassword));
-                    if (credential.user) {
-                      await this.afAuth.auth.currentUser.updatePassword(data.password);
-                      this.successToast('password');
-                    }
-                  }
-                  else this.passwordChangeErrorAlert('confirmation does not match the new password');
-                }
-                else this.passwordChangeErrorAlert('Please enter a valid new password (min 6 char, at least 1 capital and 1 number)');
-              }
-              else this.passwordChangeErrorAlert('Please enter a valid password/confirmation password');
-            }
-            catch(e) { 
-              this.showErrorAlert(e);
-              console.log('Confirm handler error: ', e);
-            }
-          })
-        }]
-      });
-      await confirmPasswordAlert.present();
-    }
-    catch(e) { 
-      console.log(e.code);
-      await this.showErrorAlert(e);
-      console.log('showChangePasswordAlert() error: ', e);
-    }
-  }
 
-  /**
-   * showUpdateEmailAlert()
-   * - presents Alert to update user email
-   * - presents success toast if new email is valid
-   * @param oldPassword string
-   */
-  private async showUpdateEmailAlert(oldPassword: string): Promise<void> {
-    try {
-      const updateAlert = await this.alertCtrl.create({
-        header: 'Update Email',
-        message: 'Enter new email address',
-        inputs: [{
-          name: 'email',
-          type: 'email',
-          placeholder: 'New email'
-        }],
-        buttons: [{
-          text: 'Cancel',
-          role: 'cancel',
-          handler: () => console.log('cancel update email')
-        }, {
-          text: 'Update',
-          handler: (async (data) => {
-            try {
-              if (data.email && EMAIL_REGEXP.test(data.email)) {
-                const credential = await this.afAuth.auth.currentUser.reauthenticateAndRetrieveDataWithCredential(
-                  firebase.auth.EmailAuthProvider.credential(this.afAuth.auth.currentUser.email, oldPassword));
-                if (credential.user) {
-                  await this.afAuth.auth.currentUser.updateEmail(data.email);
-                  this.users.updateUser(this.afAuth.auth.currentUser);
-                  this.successToast('email');
-                }
-              }
-              else this.showErrorAlert('Please enter a valid email address');
-            }
-            catch(e) { 
-              console.log(e.code);
-              await this.showErrorAlert(e);
-              console.log('update handler error: ', e);
-            }
-          })
-        }]
-      });
-      await updateAlert.present();
-    }
-    catch(e) { 
-      console.log(e.code);
-      await this.showErrorAlert(e);
-      console.log('update email error: ', e);
-    }
-  }
+  
 }

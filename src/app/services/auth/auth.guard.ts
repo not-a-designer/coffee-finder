@@ -7,6 +7,8 @@ import { Router,
 import { Observable }          from 'rxjs';
 import { map, take, tap }      from 'rxjs/operators';
 
+import * as firebase           from 'firebase/app';
+
 import { AuthService }         from '@app-services/auth/auth.service';
 
 
@@ -19,7 +21,7 @@ export class AuthGuard implements CanActivate {
     //const userAuthState = this.auth.isLoggedIn();
     return this.auth.isLoggedIn().pipe(
       take(1),
-      map((user) => { 
+      map((user: firebase.User) => { 
         if (user) console.log(user.uid);
         return !!user;
       }),

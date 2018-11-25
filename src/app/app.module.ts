@@ -19,7 +19,9 @@ import { StatusBar }                           from '@ionic-native/status-bar/ng
 import { TwitterConnect }                      from '@ionic-native/twitter-connect/ngx';
 
 import { AgmCoreModule, GoogleMapsAPIWrapper } from '@agm/core';
-import { AgmSnazzyInfoWindowModule }           from '@agm/snazzy-info-window'
+import { AgmSnazzyInfoWindowModule }           from '@agm/snazzy-info-window';
+
+import { AdsenseModule }                       from 'ng2-adsense';
 
 import { environment }                         from '@environments/environment'
 import { AppRoutingModule }                    from './app-routing.module';
@@ -30,6 +32,7 @@ import { AuthService }                         from '@app-services/auth/auth.ser
 import { AuthGuard }                           from '@app-services/auth/auth.guard';
 import { FourSquareService }                   from '@app-services/four-square/four-square.service';
 import { MapService }                          from '@app-services/map/map.service';
+import { RssFeedService }                      from '@app-services/rss-feed/rss-feed.service';
 import { StorageService }                      from '@app-services/storage/storage.service';
 import { ThemeService }                        from '@app-services/theme/theme.service';
 import { UserService }                         from '@app-services/user/user.service';
@@ -49,6 +52,11 @@ import { UserService }                         from '@app-services/user/user.ser
     AppRoutingModule,
     AgmCoreModule.forRoot({ apiKey: environment.firebase.apiKey }),
     AgmSnazzyInfoWindowModule,
+    AdsenseModule.forRoot({
+      adClient: environment.adSenseConfig.google_ad_client,
+      adSlot: environment.adSenseConfig.google_ad_slot,
+      pageLevelAds: environment.adSenseConfig.enable_page_level_ads
+    }),
     ComponentsModule,
     PipesModule
   ],
@@ -64,6 +72,7 @@ import { UserService }                         from '@app-services/user/user.ser
     GooglePlus,
     HeaderColor,
     MapService,
+    RssFeedService,
     SplashScreen,
     StatusBar,
     StorageService,

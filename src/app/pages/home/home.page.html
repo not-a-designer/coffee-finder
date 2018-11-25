@@ -12,6 +12,20 @@
 </ion-header>
 
 <ion-content padding>
-  
-  <p>If you get lost, the <a target="_blank" rel="noopener" href="https://ionicframework.com/docs">docs</a> will be your guide.</p>
+  <ion-list>
+    <ion-list-header>
+      <h1>Coffee News</h1>
+    </ion-list-header>
+    <ion-item button detail="true" detailIcon="open" *ngFor="let story of newsList" [href]="story.link">
+      <ion-thumbnail slot="start">
+        <ion-img [src]="story.thumbnail"></ion-img>
+      </ion-thumbnail>
+      <ion-label>
+        <h2 text-wrap>{{ story.title }}</h2>
+        <h3>{{ story.pubDate.slice(0, -9) }}</h3>
+        <p>By: {{ story.author }}</p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+  <!--<p>If you get lost, the <a target="_blank" rel="noopener" href="https://ionicframework.com/docs">docs</a> will be your guide.</p>-->
 </ion-content>

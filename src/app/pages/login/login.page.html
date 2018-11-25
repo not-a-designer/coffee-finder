@@ -4,7 +4,7 @@
       <ion-card-subtitle>Coffee Finder</ion-card-subtitle>
       <ion-card-title>Login</ion-card-title>
     </ion-card-header>
-    <form #loginForm="ngForm" (ngSubmit)="doLogin(loginForm)">
+    <form #loginForm="ngForm" (ngSubmit)="emailLogin(loginForm)">
       <ion-card-content text-center>
         <ion-list color="light" text-center>
           <ion-item>
@@ -98,6 +98,6 @@
       color="light" 
       size="small" 
       fill="clear"
-      (click)="doPasswordReset()">Forgot Password?</ion-button>
+      (click)="showPasswordResetAlert()">Forgot Password?</ion-button>
   </ion-toolbar>
 </ion-footer>

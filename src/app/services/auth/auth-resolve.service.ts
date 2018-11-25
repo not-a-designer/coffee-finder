@@ -7,7 +7,7 @@ import { Observable }                         from 'rxjs';
 import { take, tap }                          from 'rxjs/operators';
 
 import { AuthService }                        from '@app-services/auth/auth.service';
-import { User }                               from '@app-interfaces/coffee-user';
+import { CoffeeUser }                         from '@app-interfaces/coffee-user';
 
  
 @Injectable({ providedIn: 'root' })
@@ -15,7 +15,7 @@ export class AuthResolveService implements Resolve<any> {
  
   constructor(private auth: AuthService, private loadingController: LoadingController, private toastCtrl: ToastController) { }
  
-  resolve(route: ActivatedRouteSnapshot): Observable<User> | Promise<User> | User {
+  resolve(route: ActivatedRouteSnapshot): Observable<CoffeeUser> | Promise<CoffeeUser> | CoffeeUser {
     let loading: HTMLIonLoadingElement;
  
     this.loadingController.create({ message: 'Loading user...', duration: 300, spinner: 'circles' })

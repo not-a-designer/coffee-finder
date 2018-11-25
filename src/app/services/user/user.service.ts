@@ -5,7 +5,7 @@ import { Observable }       from 'rxjs';
 
 import * as firebase        from 'firebase/app';
 
-import { User }             from '@app-interfaces/coffee-user';
+import { CoffeeUser }       from '@app-interfaces/coffee-user';
 
 
 @Injectable({ providedIn: 'root' })
@@ -15,43 +15,67 @@ export class UserService {
 
   /**
    * @public updateUser()
-   * - updates App user in firestore from authentication
+   * - updates CoffeeUser in firestore from authentication
    * @param user firebase.User
    */
   public updateUser(user: firebase.User) {
-    const coffeeUser: User = this.buildUser(user);
-    this.afs.doc<User>(`users/${user.uid}`).set(coffeeUser, { merge: true });
+    const coffeeUser = this.buildUser(user);
+    this.afs.doc<CoffeeUser>(`users/${user.uid}`).set(coffeeUser, { merge: true });
   }
 
   /**
    * updateUserSettings()
    * - updates App user optional data
-   * @param user User
+   * @param user CoffeeUser
    */
-  public updateUserSettings(user: User) { this.afs.doc<User>(`users/${user.uid}`).update(user) }
+  public updateUserSettings(user: CoffeeUser) { this.afs.doc<CoffeeUser>(`users/${user.uid}`).update(user) }
 
   /**
    * @public getUser()
-   * - returns Observable<User> from firestore
+   * - returns Observable<CoffeeUser> from firestore
    * @param uid 
-   * @returns Observable<User>
+   * @returns Observable<CoffeeUser>
    */
-  public getUser(uid: string): Observable<User> { return this.afs.doc<User>(`users/${uid}`).valueChanges() }
+  public getUser(uid: string): Observable<CoffeeUser> { return this.afs.doc<CoffeeUser>(`users/${uid}`).valueChanges() }
 
+  
   /**
    * @private buildUser()
-   * - creates custom User from firebase.User
+   * - creates CoffeeUser from firebase.User
    * @param user firebase.User
-   * @returns User
+   * @returns CoffeeUser
    */
-  private buildUser(user: firebase.User): User {
-    return {
+  private buildUser(user: firebase.User): CoffeeUser {
+    let curProviderData: firebase.UserInfo[] = [];
+
+    for (const provider of user.providerData) {
+      const newProvider: firebase.UserInfo = {
+        displayName: provider.displayName,
+        email: provider.email,
+        phoneNumber: provider.phoneNumber,
+        photoURL: provider.photoURL,
+        providerId: provider.providerId,
+        uid: provider.uid
+      };
+      curProviderData.push(newProvider);
+    }
+    const Cuser: CoffeeUser = {
+      uid: user.uid,
+      email: user.email,
+      emailVerified: user.emailVerified,
+      isAdmin: false,
+      providerData: curProviderData,
+      displayName: user.displayName || ''
+    };
+    //console.log(Cuser);
+    return Cuser;
+    /*return {
       displayName: user.displayName || null,
       email: user.email ? user.email : user.providerData[0].email,
       emailVerified: user.emailVerified,
       providerId: user.providerData[0].providerId,
       isAdmin: false,
       uid: user.uid,
-    };
+    };*/
   }  
 }

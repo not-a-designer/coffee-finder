@@ -21,7 +21,7 @@
           <ion-item-group>
             <ion-item-divider color="light">
               <ion-icon color="primary" slot="start" name="people"></ion-icon>
-              <ion-label>User Details</ion-label>
+              <ion-label>{{ 'User Details' | uppercase }}</ion-label>
             </ion-item-divider>
             <ion-item>
               <ion-label slot="start" position="fixed">Display name</ion-label>
@@ -66,7 +66,7 @@
           <ion-item-group>
             <ion-item-divider color="light">
               <ion-icon color="primary" slot="start" name="thumbs-up"></ion-icon>
-              <ion-label color="dark">Favorite</ion-label>
+              <ion-label color="dark">{{ 'Favorite' | uppercase }}</ion-label>
             </ion-item-divider>
             <ion-item *ngIf="user.favorite; else noFavorite">
               <ion-label>
@@ -93,8 +93,9 @@
 
             <ng-template #noFavorite>
               <ion-item>
+                <ion-icon slot="start"  name="sad"></ion-icon>
                 No favorite location
-                <ion-button slot="end" icon-only fill="clear" href="/tabs/(map:map)">
+                <ion-button no-padding slot="end" icon-only fill="clear" href="/tabs/(map:map)">
                   <ion-icon name="add"></ion-icon>
                 </ion-button>
               </ion-item>
@@ -103,54 +104,11 @@
 
           <ion-item-group>
             <ion-item-divider color="light">
-              <ion-icon color="primary" slot="start" name="contact"></ion-icon>
-              <ion-label color="dark">{{ user.providerId === 'password' ? 'Email & Password' : 'OAuth' }}</ion-label>
-            </ion-item-divider>
-    
-            <ng-container *ngIf="user.providerId === 'password'; else OAuth">
-              <ion-item text-center>
-                <ng-container *ngIf="screenWidth >= 576" text-wrap>
-                  {{ user.email }}
-                </ng-container>
-  
-                <ng-container *ngIf="screenWidth < 576" text-wrap>
-                  {{ user.email | reverseTruncate : 5 }}
-                </ng-container>
-              
-                <ion-button fill="clear" slot ="end" (click)="updateEmail()">
-                  <ion-icon name="build"></ion-icon>
-                </ion-button>
-              </ion-item>
-  
-              <ion-item text-center>
-                **************
-                <ion-button fill="clear"slot="end" (click)="changePassword()">
-                  <ion-icon name="build"></ion-icon>
-                </ion-button>
-              </ion-item>
-            </ng-container>
-
-            <ng-template #OAuth>
-              <ion-item [ngSwitch]="user.providerId">
-                <ion-thumbnail slot="start">
-                  <img *ngSwitchCase="'google.com'" class="social-icon" src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" />
-                  <img *ngSwitchCase="'facebook.com'" class="social-icon" src="https://upload.wikimedia.org/wikipedia/commons/c/c2/F_icon.svg" />
-                  <img *ngSwitchCase="'twitter.com'" class="social-icon" src="https://upload.wikimedia.org/wikipedia/fr/c/c8/Twitter_Bird.svg" />
-                </ion-thumbnail>
-                <ion-text *ngSwitchCase="'twitter.com'">Logged in with Twitter</ion-text>
-                <ion-text *ngSwitchCase="'facebook.com'">Logged in with Facebook</ion-text>
-                <ion-text *ngSwitchCase="'google.com'">Logged in with Google</ion-text>
-              </ion-item>
-            </ng-template>
-            
-          </ion-item-group>
-
-          <ion-item-group>
-            <ion-item-divider color="light">
               <ion-icon color="primary" slot="start" name="options"></ion-icon>
-              <ion-label>Theme</ion-label>
+              <ion-label>{{ 'Theme' | uppercase }}</ion-label>
             </ion-item-divider>
             <ion-item>
+              <ion-icon slot="start" name="contrast"></ion-icon>
               <ion-label>
                 {{ themeToggle.checked ? 'Switch to Default' : 'Switch to Dark mode' }}
               </ion-label>
@@ -162,11 +120,86 @@
                 (ionChange)="toggleTheme($event)"></ion-toggle>
             </ion-item>
           </ion-item-group>
+
           <ion-item-group>
             <ion-item-divider color="light">
-              <ion-icon name="key" slot="start" color="primary"></ion-icon>
-              <ion-label>Account</ion-label>
+              <ion-icon color="primary" slot="start" name="contact"></ion-icon>
+              <ion-label color="dark">{{ 'Account' | uppercase }}</ion-label>
             </ion-item-divider>
+
+            <ng-container *ngFor="let p of user.providerData; let isLast = last">
+              <ion-item *ngIf="p.providerId !== 'password'; else passwordInfo" [lines]="isLast ? 'full' : ''">
+                <ng-container [ngSwitch]="p.providerId">
+                  <ion-img slot="start" *ngSwitchCase="'google.com'" class="social-icon" src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg"></ion-img>
+                  <ion-img slot="start" *ngSwitchCase="'facebook.com'" class="social-icon" src="https://upload.wikimedia.org/wikipedia/commons/c/c2/F_icon.svg"></ion-img>
+                  <ion-img slot="start" *ngSwitchCase="'twitter.com'" class="social-icon" src="https://upload.wikimedia.org/wikipedia/fr/c/c8/Twitter_Bird.svg"></ion-img>
+                </ng-container>
+                  
+                <ion-label margin-start [ngSwitch]="p.providerId">
+                  <ion-text *ngSwitchCase="'google.com'">Account linked with Google</ion-text>
+                  <ion-text *ngSwitchCase="'facebook.com'">Account linked with Facebook</ion-text>
+                  <ion-text *ngSwitchCase="'twitter.com'">Account linked with Twitter</ion-text>
+                </ion-label>
+
+                <ion-button 
+                  no-padding
+                  size="large"
+                  color="danger"
+                  slot="end" 
+                  icon-only 
+                  fill="clear" 
+                  [disabled]="user.providerData.length < 2" 
+                  (click)="showReauthenticationAlert('unlinkAccount', p.providerId)">
+                  <ion-icon name="remove-circle"></ion-icon>
+                </ion-button>
+              </ion-item>
+
+              <ng-template #passwordInfo>
+                <ion-item [lines]="isLast ? 'full' : ''">
+                  <ion-icon slot="start" name="mail"></ion-icon>
+                  <ion-label>
+                    <ion-text *ngIf="screenWidth >= 576" text-wrap>{{ user.email }}</ion-text>
+                    <ion-text *ngIf="screenWidth < 576" text-wrap>{{ user.email | reverseTruncate : 5 }}</ion-text>
+                  </ion-label>
+                  
+                
+                  <ng-container slot="end">
+                    <ion-button 
+                      no-margin
+                      fill="clear" 
+                      (click)="showReauthenticationAlert('updateEmail')">
+                      <ion-icon name="build"></ion-icon>
+                    </ion-button>
+  
+                    <ion-button 
+                      no-margin
+                      fill="clear" 
+                      (click)="showReauthenticationAlert('updatePassword')">
+                      <ion-icon name="keypad"></ion-icon>
+                    </ion-button>
+  
+                    <ion-button 
+                      no-padding
+                      size="large"
+                      color="danger"
+                      icon-only 
+                      fill="clear" 
+                      [disabled]="user.providerData.length < 2" 
+                      (click)="showReauthenticationAlert('unlinkAccount', 'password')">
+                      <ion-icon name="remove-circle"></ion-icon>
+                    </ion-button>
+                  </ng-container>
+                  
+                </ion-item>
+              </ng-template>
+            </ng-container>
+              
+            <ion-item color="secondary" button details="true" lines="full" (click)="showLinkAccountAction($event)">
+              <ion-icon color="light" slot="start" name="link"></ion-icon>
+              <ion-text>Link another account...</ion-text>
+            </ion-item>
+
+            <ion-item-divider no-margin no-padding></ion-item-divider>
             <ion-item 
               id="logout-button" 
               button 
@@ -175,15 +208,15 @@
               detail="true" 
               detailIcon="log-out"
               (click)="showLogoutAlert()">
-              Logout
+              {{ 'Logout' | uppercase }}
             </ion-item>
           </ion-item-group>
         </ion-list>
-
-        
       </ion-card-content>
     </form>
-    <ion-toolbar fullscreen color="light" id="copy-toolbar" no-padding>
+    
+  </ion-card>
+  <ion-toolbar fullscreen color="light" id="copy-toolbar" no-padding>
       <ion-item color="light" no-margin no-padding lines="none" id="copyright-info">
         <ion-button slot="start" fill="clear" href="/tabs/(settings:tos)">
           Terms of Service
@@ -196,8 +229,6 @@
         </ion-button>
       </ion-item>
     </ion-toolbar>
-  </ion-card>
-
   <br />
   <br />
   <br />
