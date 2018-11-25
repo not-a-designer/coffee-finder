@@ -2,6 +2,7 @@ import { NgModule }                  from "@angular/core";
 import { CommonModule }              from '@angular/common';
 
 import { IonicModule }               from '@ionic/angular';
+
 import { VenueDetailsCardComponent } from '@app-components/venue-details-card/venue-details-card.component';
 import { StarRatingComponent }       from '@app-components/star-rating/star-rating.component';
 import { RadiusSliderComponent }     from '@app-components/radius-slider/radius-slider.component';
@@ -11,7 +12,7 @@ import { RadiusSliderComponent }     from '@app-components/radius-slider/radius-
     declarations: [ 
         VenueDetailsCardComponent, 
         StarRatingComponent, 
-        RadiusSliderComponent 
+        RadiusSliderComponent
     ],
 
     imports: [

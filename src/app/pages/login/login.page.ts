@@ -1,11 +1,11 @@
-import { Component, OnInit }                      from '@angular/core';
-import { NgForm }                                 from '@angular/forms';
-import { Router }                                 from '@angular/router';
+import { Component, OnInit }                           from '@angular/core';
+import { NgForm }                                      from '@angular/forms';
+import { Router }                                      from '@angular/router';
 
-import { LoadingController, Platform }            from '@ionic/angular';
+import { AlertController,LoadingController, Platform } from '@ionic/angular';
 
-import { AuthService, EMAIL_REGEXP, PASS_REGEXP } from '@app-services/auth/auth.service';
-import { UserService }                            from '@app-services/user/user.service';
+import { AuthService, EMAIL_REGEXP, PASS_REGEXP }      from '@app-services/auth/auth.service';
+import { UserService }                                 from '@app-services/user/user.service';
 
 
 @Component({
@@ -19,7 +19,8 @@ export class LoginPage implements OnInit {
   public passwordPattern: RegExp = PASS_REGEXP;
   public passwordVisible: boolean = false;
 
-  constructor(private loadingCtrl: LoadingController,
+  constructor(private alertCtrl: AlertController,
+              private loadingCtrl: LoadingController,
               private platform: Platform, 
               private auth: AuthService,
               private users: UserService,
@@ -32,7 +33,7 @@ export class LoginPage implements OnInit {
     try {
       const credential = (this.platform.is('cordova')) ? 
         await this.auth.googleLogin() :
-        await this.auth.browserSocialLogin('google');
+        await this.auth.browserSocialLogin('google.com');
 
       if (credential.user) {
         console.log('user: ', credential.user);
@@ -48,7 +49,7 @@ export class LoginPage implements OnInit {
     try {
       const credential = (this.platform.is('cordova')) ?
         await this.auth.facebookLogin() :
-        await this.auth.browserSocialLogin('facebook');
+        await this.auth.browserSocialLogin('facebook.com');
         
       if (credential.user) {
         console.log('user: ', credential.user);
@@ -64,7 +65,7 @@ export class LoginPage implements OnInit {
     try {
       const credential = (this.platform.is('cordova')) ?
         await this.auth.twitterLogin() :
-        await this.auth.browserSocialLogin('twitter');
+        await this.auth.browserSocialLogin('twitter.com');
 
       if (credential.user) {
         console.log('user: ', credential.user);
@@ -76,7 +77,7 @@ export class LoginPage implements OnInit {
     catch(e) { console.error('twitterLogin() error: ', e)  }
   }
 
-  public async doLogin(form: NgForm): Promise<void> {
+  public async emailLogin(form: NgForm): Promise<void> {
     let loader: HTMLIonLoadingElement;
 
     try {
@@ -99,9 +100,50 @@ export class LoginPage implements OnInit {
     }
   }
 
-  public async doPasswordReset(): Promise<void> {
-    try { await this.auth.showResetPasswordAlert() }
+  public async showPasswordResetAlert(): Promise<void> {
+    try {
+      const alert = await this.alertCtrl.create({
+        header: 'Reset Password',
+        message: 'To reset your password, enter the your account email',
+        inputs: [{
+          type: 'email',
+          name: 'email',
+          placeholder: 'Email address'
+        }],
+        buttons: [{
+          text: 'Cancel',
+          role: 'cancel',
+          handler: () => console.log('cancel password reset')
+        }, {
+          text: 'Reset',
+          handler: (async (data) => {
+            try { 
+              const loader = await this.loadingCtrl.create({ message: 'resetting...' })
+              if (EMAIL_REGEXP.test(data.email)) {
+                loader.dismiss();
+                await this.auth.resetPassword(data.email);
+                await this.showResetSuccessAlert(data.email);
+              }
+            }
+            catch(e) { console.log('resetHandler error: ', e) }
+          })
+        }]
+      });
+      await alert.present();
+    }
     catch(e) { console.error('doPasswordReset() error: ', e) }
+  }
+
+  public async showResetSuccessAlert(email: string): Promise<void> {
+    try {
+      const successAlert = await this.alertCtrl.create({
+        header: 'Password Reset',
+        message: `Please follow the link sent to ${email} to reset your password`,
+        buttons: ['OK']
+      });
+      await successAlert.present();
+    }
+    catch(e) { console.log('passwordResetAlert() error: ', e) }
   }
 
   get isAndroid(): boolean { return this.platform.is('android') }

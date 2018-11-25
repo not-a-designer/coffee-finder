@@ -1,46 +1,97 @@
-<ion-card color="medium" no-margin no-padding>
-  <ng-content></ng-content>
-  <ion-card-header no-margin>
-    <ion-toolbar color="medium">
-      <ion-buttons slot="start" margin-end>
-        <ion-thumbnail>
-          <img [src]="venueCatIcon" />
-        </ion-thumbnail>
-      </ion-buttons>
+<ion-fab no-margin horizontal="end" vertical="top" slot="fixed" *ngIf="platform.width() > 691">
+  <ion-fab-button mini fill="clear" (click)="dismiss()">
+    <ion-icon color="dark" name="close"></ion-icon>
+  </ion-fab-button>
+</ion-fab>
 
-      <ion-card-title><ion-text color="light">{{ venue?.name }}</ion-text></ion-card-title>
-      <ion-card-subtitle><ion-text color="tertiary">({{ venue.categories[0].name }})</ion-text></ion-card-subtitle>
-    </ion-toolbar>
-  </ion-card-header>
+<ion-header *ngIf="platform.width() < 692">
+  <ion-toolbar color="primary">
+    <ion-title>{{ venue.name }}</ion-title>
 
-  <ion-card-content no-padding>
-    <ion-list no-padding lines="none">
-      <ion-item color="medium" lines="none">
-        <ion-label>
-          <h2>
-            <ion-text>{{ venue?.location.formattedAddress[0] }}</ion-text>
-            <span float-end><star-rating [rating]="'4.2'"></star-rating></span>
-          </h2>
-          <p>{{ venue?.location.formattedAddress[1] }}</p>
-          <p>{{ venue?.location.formattedAddress[2] }}</p>
-        </ion-label>
-      </ion-item>
-    </ion-list>
+    <ion-buttons slot="end">
+      <ion-button icon-only fill="clear" (click)="dismiss()">
+        <ion-icon name="close"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
 
-    <ion-tab-bar slot="bottom" color="primary">
-      <ion-tab-button>
-          <ion-icon name="information-circle"></ion-icon>
-      </ion-tab-button>
+<ion-content>
+  <ion-card color="light" no-margin no-padding>
+    <ion-card-header no-margin>
+      <ion-toolbar color="light">
+        <ion-buttons slot="start" margin-end>
+          <ion-thumbnail>
+            <img [src]="venueCatIcon" />
+          </ion-thumbnail>
+        </ion-buttons>
 
-      <ion-tab-button (click)="addFavorite()" [disabled]="!user">
-        <ion-icon
-        [color]="(user?.favorite && user?.favorite.id === venue.id) ? 'light' : 'dark'" 
-        [name]="(user?.favorite && user?.favorite.id === venue.id) ? 'star' : 'star-outline'"></ion-icon>
-      </ion-tab-button>
+        <ion-card-title><ion-text color="medium">{{ venue?.name }}</ion-text></ion-card-title>
+        <ion-card-subtitle><ion-text color="tertiary">({{ venue.categories[0].name }})</ion-text></ion-card-subtitle>
+      </ion-toolbar>
+    </ion-card-header>
 
-      <ion-tab-button>
-        <ion-icon name="navigate"></ion-icon>
-      </ion-tab-button>
-    </ion-tab-bar>
-  </ion-card-content>
-</ion-card>
+    <ion-card-content no-padding>
+      <ion-list no-padding lines="none" margin-bottom>
+        <ion-item color="light" lines="none">
+          <ion-label>
+            <h2>
+              <ng-container *ngIf="venue.location.formattedAddress.length < 3; else fullAddress">
+                <ion-text>Street address not listed</ion-text>
+              </ng-container>
+              <ng-template #fullAddress>
+                <ion-text>{{ venue.location.formattedAddress[0] }}</ion-text>
+              </ng-template>
+              <span float-end><star-rating [rating]="'4.2'"></star-rating></span>
+            </h2>
+            <ng-container *ngIf="venue.location.formattedAddress.length < 3; else completeAddress">
+              <p>{{ venue?.location.formattedAddress[0] }}</p>
+              <p>{{ venue?.location.formattedAddress[1] }}</p>
+            </ng-container>
+
+            <ng-template #completeAddress>
+              <p>{{ venue?.location.formattedAddress[1] }}</p>
+              <p>{{ venue?.location.formattedAddress[2] }}</p> 
+            </ng-template>
+          </ion-label>
+        </ion-item>
+
+        <ng-template #smallButtons>
+          <ion-button color="tertiary" class="detail-button" expand="block" margin-bottom>
+            <ion-icon slot="start" name="information-circle" margin-end></ion-icon>
+            <ion-label>Details</ion-label>
+          </ion-button>
+
+          <ion-button color="secondary" margin-bottom (click)="addFavorite()" [disabled]="!user" class="detail-button" expand="block">
+            <ion-icon margin-end [name]="(user?.favorite && user?.favorite.id === venue.id) ? 'star' : 'star-outline'"></ion-icon>
+            <ion-label *ngIf="user?.favorite && user?.favorite.id === venue.id">Remove Favorite</ion-label>
+            <ion-label *ngIf="!(user?.favorite && user?.favorite.id === venue.id)">Set Favorite</ion-label>
+          </ion-button>
+
+          <ion-button color="primary" class="detail-button" expand="block" margin-bottom>
+            <ion-icon margin-end name="navigate"></ion-icon>
+            <ion-label>Directions</ion-label>
+          </ion-button>
+        </ng-template>
+
+      </ion-list>
+
+      <ion-tab-bar slot="bottom" color="primary" *ngIf="platform.width() > 691; else smallButtons">
+        <ion-tab-button>
+            <ion-icon name="information-circle"></ion-icon>
+        </ion-tab-button>
+
+        <ion-tab-button (click)="addFavorite()" [disabled]="!user">
+          <ion-icon
+          [color]="(user?.favorite && user?.favorite.id === venue.id) ? 'medium' : 'dark'" 
+          [name]="(user?.favorite && user?.favorite.id === venue.id) ? 'star' : 'star-outline'"></ion-icon>
+        </ion-tab-button>
+
+        <ion-tab-button>
+          <ion-icon name="navigate"></ion-icon>
+        </ion-tab-button>
+      </ion-tab-bar>
+
+    </ion-card-content>
+  </ion-card>
+</ion-content>

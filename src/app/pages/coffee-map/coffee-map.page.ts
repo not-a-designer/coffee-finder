@@ -1,24 +1,29 @@
-import { Component, OnInit, ViewChild }              from '@angular/core';
+import { AfterViewInit, 
+         Component, 
+         OnInit, 
+         ViewChild }                        from '@angular/core';
 
 import { LoadingController, 
          Platform, 
          PopoverController, 
          ToastController, 
-         AlertController}                            from '@ionic/angular';
-         import { AdMobFree, AdMobFreeBannerConfig } from '@ionic-native/admob-free/ngx';
+         AlertController,
+         ModalController}                   from '@ionic/angular';
+import { AdMobFree, AdMobFreeBannerConfig } from '@ionic-native/admob-free/ngx';
 
-import { MapsAPILoader, AgmMap }                     from '@agm/core';
+import { MapsAPILoader, AgmMap }            from '@agm/core';
 
-import { take }                                      from 'rxjs/operators';
+import { take }                             from 'rxjs/operators';
 
-import { environment }                               from '@environments/environment.prod';
-import { Venue, VenueDetails }                       from '@app-interfaces/foursquare/venue';
-import { FourSquareService }                         from '@app-services/four-square/four-square.service';
-import { MapService }                                from '@app-services/map/map.service';
-import { RadiusSliderComponent }                     from '@app-components/radius-slider/radius-slider.component';
-import { User }                                      from '@app-interfaces/coffee-user';
-import { UserService }                               from '@app-services/user/user.service';
-import { AuthService }                               from '@app-services/auth/auth.service';
+import { environment }                      from '@environments/environment.prod';
+import { Venue, VenueDetails }              from '@app-interfaces/foursquare/venue';
+import { FourSquareService }                from '@app-services/four-square/four-square.service';
+import { MapService }                       from '@app-services/map/map.service';
+import { RadiusSliderComponent }            from '@app-components/radius-slider/radius-slider.component';
+import { CoffeeUser }                       from '@app-interfaces/coffee-user';
+import { UserService }                      from '@app-services/user/user.service';
+import { AuthService }                      from '@app-services/auth/auth.service';
+import { VenueDetailsCardComponent } from '@app-components/venue-details-card/venue-details-card.component';
 
 
 declare const google: any;
@@ -38,7 +43,7 @@ interface MyMarker {
   templateUrl: './coffee-map.page.html',
   styleUrls: ['./coffee-map.page.scss'],
 })
-export class CoffeeMapPage implements OnInit {
+export class CoffeeMapPage implements OnInit, AfterViewInit {
 
   @ViewChild(AgmMap) 
   public map: AgmMap;
@@ -47,6 +52,8 @@ export class CoffeeMapPage implements OnInit {
   details: VenueDetails;
   venues: Venue[] = [];
   markers: MyMarker[] = [];
+  adClient: string = environment.adSenseConfig.google_ad_client;
+  adSlot: string = environment.adSenseConfig.google_ad_slot;
 
   public geocoder: any;
 
@@ -57,7 +64,7 @@ export class CoffeeMapPage implements OnInit {
   public mapZoom: number = 13;
   public showRadius: boolean = false;
   public radius: number = 1600;
-  user: User;
+  user: CoffeeUser;
 
   bannerConfig: AdMobFreeBannerConfig = {
     isTesting: true,
@@ -71,6 +78,7 @@ export class CoffeeMapPage implements OnInit {
               private loadingCtrl: LoadingController,
               private alertCtrl: AlertController,
               private platform: Platform, 
+              private modalCtrl: ModalController,
               private popoverCtrl: PopoverController,
               private toastCtrl: ToastController,
               private auth: AuthService,
@@ -94,6 +102,10 @@ export class CoffeeMapPage implements OnInit {
     this.maps.zoom.subscribe((z) => this.mapZoom = z);
     this.loadMap();
     this.getCurrentLocation();
+  }
+
+  public ngAfterViewInit(): void {
+    //if (this.selectedVenue) this.selectedVenue = null;
   }
 
   async getCurrentLocation(): Promise<void> {
@@ -126,30 +138,21 @@ export class CoffeeMapPage implements OnInit {
       console.log(`{ lat: ${event.latitude}, lng: ${event.longitude} }`);
       const venueMarker: Venue = this.venues[markerIndex];
 
-      if (!this.selectedVenue) {
-        console.log(`setting selectedVenue to ${venueMarker.name}`);
-        console.log('map', this.user);
-        this.selectedVenue = venueMarker;
-        this.mapLat = event.latitude;
-        this.mapLng = event.longitude;
-        this.maps.panTo(event.latitude, event.longitude);
-      }
+      console.log(`setting selectedVenue to ${venueMarker.name}`);
+      console.log('map', this.user);
+      this.selectedVenue = venueMarker;
+      this.mapLat = event.latitude;
+      this.mapLng = event.longitude;
+      this.maps.panTo(event.latitude, event.longitude);
 
-      else {
-        if (venueMarker.id === this.selectedVenue.id) {
-          this.selectedVenue = null;
-          console.log('location already selected');
-          return;
-        }
-        else {
-          console.log(`setting selectedVenue to ${venueMarker.name}`);
-          console.log('map', this.user);
-          this.selectedVenue = venueMarker;
-          this.mapLat = event.latitude;
-          this.mapLng = event.longitude;
-          this.maps.panTo(event.latitude, event.longitude);
-        }
-      }      
+      const modal = await this.modalCtrl.create({
+        component: VenueDetailsCardComponent,
+        componentProps: { venue: this.selectedVenue },
+        cssClass: 'info-modal',
+        backdropDismiss: true,
+        showBackdrop: true
+      });
+      return await modal.present();    
     }
     catch(e) { console.log('selectMarker() error: ', e) }
   }
@@ -293,5 +296,8 @@ export class CoffeeMapPage implements OnInit {
     }
     catch(e) { console.log('hideAdmob() error: ', e) }
   }
+
+
+  get isCordova(): boolean { return this.platform.is('cordova') }
 
 }

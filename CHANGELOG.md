@@ -2,10 +2,29 @@
 
 
 
+### 0.1.1 11/24/2018 'Account linking, info window modal fixes, Home page Feed'
+
+@Angular/Fire
+- Authentication - Unlink account by provider
+- Authentication - Link account by provider or email
+- Authentication - Reauthentication
+
+### Features
+- Selected Venue Info window position and sizing fixed
+- modal css added to variables.scss
+- Home Page shows rss feed entries
+
+
+
 ### 0.0.1 11/20/2018 'Map UI updates and additions, Foursquare added'
 
+<<<<<<< HEAD
 #### Features
 - installed node-foursquare
+=======
+### Features
+- Installed node-foursquare
+>>>>>>> Account linking, info window modal fixes, Home page Feed
 - 'You are here' marker disctinct from venues
 - Location radius no longer changes with map panning, now a fab + popover
 - User interface 'favorite<Venue>' property added

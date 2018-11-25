@@ -42,7 +42,7 @@
       <agm-marker 
         [latitude]="currentLat" 
         [longitude]="currentLng" 
-        iconUrl="http://maps.google.com/mapfiles/ms/micons/green-dot.png"
+        iconUrl="https://maps.google.com/mapfiles/ms/micons/green-dot.png"
         markerDragable="false"></agm-marker>
     </agm-circle>
 
@@ -75,7 +75,7 @@
     </agm-marker>
   </agm-map>
 
-  <venue-details-card 
+  <!--<venue-details-card 
     *ngIf="selectedVenue" 
     [venue]="selectedVenue"
     [user]="user"
@@ -85,5 +85,7 @@
         <ion-icon color="light" name="close"></ion-icon>
       </ion-button>
     </ion-fab>
-  </venue-details-card>
+  </venue-details-card>-->
+  
+  <ng2-adsense [adClient]="adClient" [adSlot]="adSlot"></ng2-adsense>
 </ion-content>

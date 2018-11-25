@@ -1,19 +1,29 @@
+import { ChangeDetectorRef, 
+         Component, 
+         OnInit, 
+         NgZone}                 from '@angular/core';
+import { Router }                from '@angular/router';
 
-import { ChangeDetectorRef, Component, OnInit, NgZone}  from '@angular/core';
-import { Router }                                       from '@angular/router';
+import { AlertController, 
+         LoadingController, 
+         Platform, 
+         ToastController, 
+         ActionSheetController } from '@ionic/angular';
 
-import { AlertController, LoadingController, Platform, ToastController } from '@ionic/angular';
+import { Observable }            from 'rxjs';
+import { take }                  from 'rxjs/operators';
 
-import { Observable }                                   from 'rxjs';
-import { take }                                         from 'rxjs/operators';
+import * as firebase             from 'firebase/app';
+import * as moment               from 'moment';
 
-import * as moment                                      from 'moment'
-
-import { AuthService }                                  from '@app-services/auth/auth.service';
-import { ThemeService }                                 from '@app-services/theme/theme.service';
-import { UserService }                                  from '@app-services/user/user.service';
-import { User }                                         from '@app-interfaces/coffee-user';
-import { Venue } from '@app-interfaces/foursquare/venue';
+import { AuthService, 
+         SOCIAL_MEDIA, 
+         EMAIL_REGEXP, 
+         PASS_REGEXP }           from '@app-services/auth/auth.service';
+import { ThemeService }          from '@app-services/theme/theme.service';
+import { UserService }           from '@app-services/user/user.service';
+import { CoffeeUser }            from '@app-interfaces/coffee-user';
+import { Venue }                 from '@app-interfaces/foursquare/venue';
 
 
 @Component({
@@ -24,7 +34,10 @@ import { Venue } from '@app-interfaces/foursquare/venue';
 export class UserSettingsPage implements OnInit {
 
   //public user: User = null;
-  user: User;
+  
+  user: CoffeeUser = null;
+  linkedAccounts: Array<firebase.UserInfo> = [];
+  unlinkedAccounts: Array<any> = [...SOCIAL_MEDIA];
   public changesSaved: boolean;
   public verifyMessageHidden: boolean;
 
@@ -32,6 +45,7 @@ export class UserSettingsPage implements OnInit {
               private cdr: ChangeDetectorRef,
               private zone: NgZone,
               private platform: Platform, 
+              private actionsheetCtrl: ActionSheetController,
               private alertCtrl: AlertController,
               private loadingCtrl: LoadingController,
               private toastCtrl: ToastController,
@@ -40,12 +54,44 @@ export class UserSettingsPage implements OnInit {
               private users: UserService) { }
 
   public ngOnInit(): void  { 
-      this.auth.user$.subscribe((user) => this.user = user);
+      this.auth.user$.subscribe((user) => {
+        console.log('user:', user);
+        this.user = user;
+        
+        this.getRemainingProviders();
+        
+        
+        //console.log(...this.unlinkedAccounts);
+          
+      //console.log(`CURRENT_ACCOUNT: ${this.user.currentProvider.providerId}`, this.user.currentProvider);
+        //this.user.providerData.forEach((provider) => console.log(`LINKED-ACCOUNTS: ${provider.providerId}: `, provider));
+        //this.unlinkedAccounts.forEach((account) => console.log(`UNLINKED-ACCOUNTS: ${account.providerId}:`, account));
+      });
       this.changesSaved = true;
   }
 
-  public sendVerificationEmail(): void {
-    this.auth.sendEmailVerification();
+
+  public async sendVerificationEmail(): Promise<void> {
+    try {
+      if (!this.user.emailVerified) {
+        await this.auth.sendEmailVerification();
+        await this.verificationEmailToast(this.user.email);
+      }
+    }
+    catch(e) { console.log('sendVerificationEamil() error: ', e)}
+  }
+
+  private async verificationEmailToast(email: string): Promise<void> {
+    try {
+      console.log('verification email sent');
+      const verifyToast = await this.toastCtrl.create({
+        message: `Please check your ${email} inbox to verify you account`,
+        position: 'middle',
+        duration: 2500
+      });
+      await verifyToast.present();
+    }
+    catch(e) { console.log('verificationEmailToast() error: ', e) }
   }
 
   /*public toggleTheme(event?): void { 
@@ -101,6 +147,82 @@ export class UserSettingsPage implements OnInit {
     catch(e) { console.log('saveUser() error: ', e) }
   }
 
+  public async showUnlinkAlert(event, providerId: string): Promise<void> {
+    try { 
+      const alert = await this.alertCtrl.create({
+        header: 'Confirm Unlink',
+        message: `Are you sure you want to unlink ${providerId} from this user?`,
+        buttons: [{
+          text: 'Cancel',
+          role: 'cancel',
+          handler: () => console.log('cancel account unlink from ', providerId)
+        }, {
+          text: 'Unlink',
+          role: 'destructive',
+          handler: (async () => {
+            try {
+            }
+            catch(err) { console.log(err) }
+          })
+        }]
+      });
+      await alert.present();
+    }
+    catch(e) { console.log(e) }
+  }
+
+  public async showLinkAccountAction(event): Promise<void> {
+    try {
+      console.log(event)
+      this.getRemainingProviders();
+      let buttonsArray: any[] = [];
+      let emailButton: any;
+
+      const cancelButton = {
+        text: 'Cancel',
+        role: 'cancel',
+        icon: 'close',
+        handler: () => console.log('cancel account linking')
+      };
+
+      for (let acct of this.unlinkedAccounts) {
+        if (acct.providerId !== 'password') {
+          const button = {
+            text: acct.label,
+            icon: acct.icon,
+            handler: (async () => {
+              try { await this.showReauthenticationAlert('linkAccount', acct.providerId) }
+              catch(e) { console.log(e) }
+            })
+          };
+          buttonsArray.push(button);
+        }
+        else {
+          emailButton = {
+            text: acct.label,
+            icon: acct.icon,
+            handler: (async () => {
+              try {await this.showReauthenticationAlert('linkEmail', 'password') }
+              catch(e) { console.log(e) }
+            })
+          }
+        }
+      }
+
+      if (emailButton) buttonsArray.push(emailButton);
+      buttonsArray.push(cancelButton);
+      console.log(...buttonsArray)
+
+      const actionsheet = await this.actionsheetCtrl.create({
+        header: 'Link account to',
+        buttons: [...buttonsArray]
+      });
+
+      await actionsheet.present();
+    }
+    catch(e) { console.log(e) }
+  }
+
   private async doLogout(): Promise<void> {
     try {
       const loader = await this.loadingCtrl.create({
@@ -121,19 +243,6 @@ export class UserSettingsPage implements OnInit {
       loader.dismiss();
     }
     catch(e) { console.log('doLogout() error: ', e) }
-  }
-
-  public async changePassword(): Promise<void> {
-    try { await this.auth.verifyIdentityAlert('updatePassword') }
-    catch(e) { console.log('changePassword() error: ', e) }
-  }
-
-  public async updateEmail(): Promise<void> {
-    try { 
-      await this.auth.verifyIdentityAlert('updateEmail');
-      this.cdr.detectChanges();
-  }
-    catch(e) { console.log('updateEmail() error: ', e) }
   }
 
   public async showRemoveFavoriteAlert(): Promise<void> {
@@ -173,8 +282,278 @@ export class UserSettingsPage implements OnInit {
     catch(e) { console.log(e) }
   }
 
+  private getRemainingProviders() {
+    //SOCIAL_MEDIA.forEach((media) => console.log('SOC', media.label));
+    this.unlinkedAccounts = [...SOCIAL_MEDIA];
+    //this.unlinkedAccounts.forEach((acct) => console.log('reset', acct.providerId));
+    for (let p of this.user.providerData) {
+      const match = this.unlinkedAccounts.find((acct) => acct.providerId === p.providerId);
+      if (match) {
+        //console.log('remove ' + match.providerId);
+        const index = this.unlinkedAccounts.indexOf(match);
+        this.unlinkedAccounts.splice(index, 1);
+      }
+    }
+    //this.unlinkedAccounts.forEach((acct) => console.log(acct.providerId));
+  }
+
+
+  public async showReauthenticationAlert(mode: string, providerId?: any): Promise<void> {
+    try {
+      const password = this.user.providerData.find((provider) => provider.providerId === 'password');
+      let currentCredential;
+      if (password) {
+        const alert = await this.alertCtrl.create({
+          header: 'Reauthtentication',
+
+          message: 'Please re-enter your password',
+
+          inputs: [{
+            name: 'password',
+            type: 'password',
+            placeholder: 'Current password'
+          }],
+
+          buttons: [{
+            text: 'Cancel',
+            role: 'cancel',
+            handler: () => console.log('password change cancelled')
+          }, {
+            text: 'Next',
+            handler: (async (data) => {
+              try {
+                if (data.password) {
+                  currentCredential = await this.auth.reauthenticateWithCredential(data.password);
+                  if (currentCredential.user) {
+                    switch(mode) {
+                      case 'updateEmail': {
+                        this.showUpdateEmailAlert();
+                        break;
+                      }
+                      case 'updatePassword': {
+                        this.showUpdatePasswordAlert();
+                        break;
+                      }
+                      case 'linkAccount': {
+                        this.linkAccount(providerId)
+                        break;
+                      }
+                      case 'linkEmail': {
+                        await this.showLinkEmailAlert();
+                        break;
+                      }
+                      case 'unlinkAccount': {
+                        await this.showUnlinkAccountAlert(providerId);
+                        break;
+                      }
+                    }
+                  }
+                }
+              }
+              catch(e) { console.log(e) }
+            })
+          }]
+        });
+        await alert.present();
+      }
+      else {
+        currentCredential = await this.auth.reauthenticateWithPopup(this.user.providerData[0].providerId);
+        if (currentCredential.user) {
+          switch(mode) {
+            case 'updateEmail': {
+              this.showUpdateEmailAlert()
+              break;
+            }
+            case 'updatePassword': {
+              this.showUpdatePasswordAlert();
+              break;
+            }
+            case 'linkAccount': {
+              this.linkAccount(providerId);
+              break;
+            }
+            case 'linkEmail': {
+              await this.showLinkEmailAlert();
+              break;
+            }
+            case 'unlinkAccount': {
+              await this.showUnlinkAccountAlert(providerId);
+              break;
+            }
+          }
+        }
+      }
+    }
+    catch(e) { console.log(e) }
+  }
+
+  private async showLinkEmailAlert(): Promise<void> {
+    try {
+      const alert = await this.alertCtrl.create({
+        header: 'Link Email',
+        message: 'Enter new email and password',
+        inputs: [{
+          type: 'email',
+          name: 'email',
+          placeholder: 'Email'
+        }, {
+          type: 'password',
+          name: 'password',
+          placeholder: 'Password'
+        }, {
+          type: 'password',
+          name: 'confirm',
+          placeholder: 'Confirm password'
+        }],
+        buttons: [{
+          text: 'Cancel',
+          role: 'cancel',
+          handler: () => { console.log('cancel linking email') }
+        }, {
+          text: 'Link',
+          handler: (async (data) => {
+            if (data) {
+              if (data.email && EMAIL_REGEXP.test(data.email)) {
+                if (data.password && PASS_REGEXP.test(data.password)) {
+                  if (data.confirm === data.password) {
+                    const credential = await this.auth.linkEmail(data.email, data.password);
+                    if (credential.user) {
+                      this.users.updateUser(credential.user);
+                    }
+                  }
+                  else console.log('password confirmation does not match password')
+                }
+                else console.log('please enter a valid password')
+              }
+              else console.log('please enter avalid email')
+            }
+            else console.log('please enter and email and password, and confirm')
+          })
+        }]
+      });
+      await alert.present();
+    }
+    catch(e) { console.log(e) }
+  }
+
+  private async showUpdateEmailAlert(): Promise<void> {
+    try {
+      const alert = await this.alertCtrl.create({
+        header: 'Update Email',
+        message: 'Enter new email address',
+        inputs: [{
+          name: 'email',
+          type: 'email',
+          placeholder: 'New email'
+        }],
+        buttons: [{
+          text: 'Cancel',
+          role: 'cancel',
+          handler: () => console.log('cancel update email')
+        }, {
+          text: 'Update',
+          handler: (async (data) => {
+            try {
+              if (data.email && EMAIL_REGEXP.test(data.email)) this.auth.updateEmail(data.email);
+            }
+            catch(e) { console.log(e.code) }
+          })
+        }]
+      });
+      await alert.present();
+    }
+    catch(e) { console.log(e.code) }
+  }
+
+  private async showUnlinkAccountAlert(providerId: string): Promise<void> {
+    try {
+      const alert = await this.alertCtrl.create({
+        header: 'Confirm Unlink',
+        message: `Are you sure you want to unlink ${ providerId === 'password' ? this.user.email : providerId.slice(0, -4) } from this user?`,
+        buttons: [{
+          text: 'Cancel',
+          role: 'cancel',
+          handler: () => console.log('cancel account unlink from ', providerId)
+        }, {
+          text: 'Unlink',
+          role: 'destructive',
+          handler: (async () => {
+            try { 
+              const updatedUser = await this.auth.unlinkAccount(providerId);
+              if (updatedUser.uid) this.users.updateUser(updatedUser);
+            }
+            catch(err) { console.log(err) }
+          })
+        }]
+      });
+      await alert.present();
+    }
+    catch(e) { console.log(e) }
+  }
+
+  private async showUpdatePasswordAlert(): Promise<void> {
+    try {
+      const alert = await this.alertCtrl.create({
+        header: 'Change Password',
+        message: 'Enter new password',
+        inputs: [{
+          name: 'password',
+          type: 'password',
+          placeholder: 'New password',
+        }, {
+          name: 'confirm',
+          type: 'password',
+          placeholder: 'Confirm password',
+        }],
+        buttons: [{
+          text: 'Cancel',
+          role: 'cancel',
+          handler: () => console.log('cancel password change')
+        }, {
+          text: 'Confirm',
+          handler: (async (data) => {
+            try {
+              if (data.password && data.confirm) {
+                if (PASS_REGEXP.test(data.password)) {
+                  if (data.password === data.confirm) {
+                    await this.auth.updatePassword(data.password);
+                  }
+                  else console.log('confirmation does not match the new password');
+                }
+                else console.log('Please enter a valid new password (min 6 char, at least 1 capital and 1 number)');
+              }
+              else console.log('Please enter a valid password/confirmation password');
+            }
+            catch(e) { console.log(e.code) }
+          })
+        }]
+      });
+      await alert.present();
+    }
+    catch(e) { console.log(e.code) }
+  }
+  
+  private async linkAccount(providerId: string) {
+    try {
+      const credential = await this.auth.linkAccount(providerId);
+      if (credential.user) {
+        this.users.updateUser(credential.user);
+        this.getRemainingProviders();
+      }
+    }
+    catch(e) { console.log(e) }
+  }
+
   /** HELPED GETTERS  **/
   get isAndroid(): boolean { return this.platform.is('android') }
+
+  get isPasswordProvider(): boolean { 
+    let passCheck: boolean = false
+    for (let provider of this.user.providerData) {
+      if (provider.providerId === 'password') passCheck = true;
+    }
+    return passCheck;
+  }
   get maxAge(): string { return moment().subtract(18, 'years').format('YYYY-MM-DD') }
   get screenWidth(): number { return this.platform.width() }
 }
