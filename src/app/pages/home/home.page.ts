@@ -1,12 +1,19 @@
-import { AfterViewInit, Component, OnInit }             from '@angular/core';
+import { AfterViewInit, 
+         Component, 
+         OnInit, 
+         ViewChild }                 from '@angular/core';
 
-import { Platform, LoadingController, ToastController } from '@ionic/angular';
+import { Content,
+         LoadingController, 
+         Platform, 
+         ToastController }           from '@ionic/angular';
 
-import { Observable }                                   from 'rxjs';
+import { Observable }                from 'rxjs';
 
-import { AuthService }                                  from '@app-services/auth/auth.service';
-import { RssFeedService, RSSResult }                    from '@app-services/rss-feed/rss-feed.service';
-import { CoffeeUser }                                   from '@app-interfaces/coffee-user';
+import { environment }               from '@environments/environment';
+import { AuthService }               from '@app-services/auth/auth.service';
+import { RssFeedService, RSSResult } from '@app-services/rss-feed/rss-feed.service';
+import { CoffeeUser }                from '@app-interfaces/coffee-user';
 
 
 interface RssData {
@@ -23,8 +30,9 @@ interface RssData {
 })
 export class HomePage implements AfterViewInit, OnInit {
 
+  @ViewChild(Content) public content: Content;
+
   public user$: Observable<CoffeeUser>;
-  
   public feeds: Array<RssData> = [
     {
       url: 'https://sprudge.com/feed/',
@@ -57,7 +65,7 @@ export class HomePage implements AfterViewInit, OnInit {
     }
   ];
   public selectedFeed: RssData;
-  public selectedTitle: string;
+  public selectedTitle: string = this.feeds[0].title;
 
   public currentFeed: RSSResult;
 
@@ -72,7 +80,6 @@ export class HomePage implements AfterViewInit, OnInit {
   public async ngOnInit(): Promise<void> { 
     try {
       this.user$ = this.auth.user$;
-      this.selectedTitle = this.feeds[0].title;
       this.setCurrentFeed(0, null);
     }
     catch(e) { console.log(e) }
@@ -99,6 +106,7 @@ export class HomePage implements AfterViewInit, OnInit {
     setTimeout(() => {
       this.getFeed();
       event.target.complete();
+      this.content.scrollToTop();
     }, 500);
   }
 
@@ -113,6 +121,7 @@ export class HomePage implements AfterViewInit, OnInit {
       this.selectedTitle = this.selectedFeed.title;
       //console.log('current feed set: ', this.selectedFeed.title);
       await this.getFeed();
+      this.content.scrollToTop();
       loader.dismiss();
     }
     catch(e) { console.log(e) }

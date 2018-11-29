@@ -2,6 +2,15 @@
 
 
 
+### 0.0.1 11/29/2018 'Geolocation fixes, ui fixes'
+
+#### Features
+- Adsense - Created custom footer ad component to implement Adsense, ad request pending
+- Alerts - Favorite alerts refactored to VenueDetails modal component and UserSettings page
+- Geolocation - no correctly recenters map and radius circle initially and on both location and radius updates
+
+
+
 ### 0.0.1 11/28/2018 'Google Maps API Directions added'
 
 #### Features

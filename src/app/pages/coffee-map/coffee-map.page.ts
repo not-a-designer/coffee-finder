@@ -63,27 +63,19 @@ const FIELDS: string[] = [
 })
 export class CoffeeMapPage implements OnInit, AfterViewInit {
 
-  //@ViewChild(AgmMap) 
-  //public agmMap: AgmMap;
   @ViewChild('map') mapElement: ElementRef;
-  
 
-  selectedVenue: google.maps.places.PlaceResult;
-  details: google.maps.places.PlaceResult;
+  selectedVenue: google.maps.places.PlaceResult = null;
+  details: google.maps.places.PlaceResult = null;
   venues: google.maps.places.PlaceResult[] = [];
   markers: any[] = [];
-  adClient: string = environment.adSenseConfig.google_ad_client;
-  adSlot: string = environment.adSenseConfig.google_ad_slot;
 
   public map: any;
   public geocoder: any;
   public directionsService: any;
-  //public directionsDisplay: any;
   public placesService: any;
   public radiusCircle: any;
 
-  //public mapLat: number;
-  //public mapLng: number;
   public currentLat: number;
   public currentLng: number;
   public mapZoom: number = 13;
@@ -120,10 +112,7 @@ export class CoffeeMapPage implements OnInit, AfterViewInit {
   public ngOnInit(): void {
     this.startAdmob();
     this.auth.user$.pipe(take(1)).subscribe((user) => this.user = user);
-    this.selectedVenue = null;
     this.getCurrentLocation();
-
-    
     this.loadMap();
   }
 
@@ -143,6 +132,8 @@ export class CoffeeMapPage implements OnInit, AfterViewInit {
     try {
       if (this.platform.is('cordova')) await this.maps.getNativePosition();
       else await this.maps.getBrowserPosition();
+
+      //this.map.panTo(new google.maps.LatLng(this.currentLat, this.currentLng));
     }
     catch(e) { console.log('getCurrentPosition() error: ', e) }
   }
@@ -151,51 +142,38 @@ export class CoffeeMapPage implements OnInit, AfterViewInit {
     try {
       const loader = await this.loadingCtrl.create({ message: 'locating...', spinner: 'circles' });
       await loader.present();
+
       this.getCurrentLocation();
       this.map.panTo(new google.maps.LatLng(this.currentLat, this.currentLng));
+      if (this.radiusCircle != undefined) this.radiusCircle.setMap(null);
+      this.radiusCircle = new google.maps.Circle({
+        strokeColor: '#3171e0',
+        strokeOpacity: 0.8,
+        strokeWeight: 2,
+        fillColor: '#3171e0',
+        fillOpacity: 0.35,
+        map: this.map,
+        center: new google.maps.LatLng(this.currentLat, this.currentLng),
+        radius: this.radius
+      });
+
       this.nearbySearch();
       loader.dismiss();
     }
     catch(e) { console.log(e) }
 
   }
-  /*public async selectMarker(event, markerIndex: number): Promise<void> { 
-    try { 
-      console.log(`{ lat: ${event.latitude}, lng: ${event.longitude} }`);
-      const venueMarker = this.venues[markerIndex];
-
-      console.log(`setting selectedVenue to ${venueMarker.name}`);
-      console.log('map', this.user);
-      this.selectedVenue = venueMarker;
-      this.mapLat = event.latitude;
-      this.mapLng = event.longitude;
-      //await this.mapsAPIWrapper.panTo(new google.maps.LatLng(event.latitude, event.longitude));
-
-      const modal = await this.modalCtrl.create({
-        component: VenueDetailsCardComponent,
-        componentProps: { venue: this.selectedVenue },
-        cssClass: 'info-modal',
-        backdropDismiss: true,
-        showBackdrop: true
-      });
-      return await modal.present();    
-    }
-    catch(e) { console.log('selectMarker() error: ', e) }
-  }*/
 
   public async loadMap(): Promise<void> {
     try {
-      this.selectedVenue = null;
       const loader = await this.loadingCtrl.create({
         spinner: 'circles',
         message: 'loading map...',
         keyboardClose: true,
         duration: 500
       });
-
       await loader.present();
 
-      this.getCurrentLocation();
       await this.mapsAPILoader.load();
       this.map = new google.maps.Map(this.mapElement.nativeElement, {
         center: new google.maps.LatLng(this.currentLat, this.currentLng),
@@ -203,16 +181,8 @@ export class CoffeeMapPage implements OnInit, AfterViewInit {
         clickableIcons: false,
         disableDefaultUI: true
       });
-      this.map.panTo(new google.maps.LatLng(this.currentLat, this.currentLng));
       google.maps.event.addListenerOnce(this.map, 'idle', () => {
-        this.geocoder = new google.maps.Geocoder();
-        this.placesService = new google.maps.places.PlacesService(this.map);
-        this.directionsService = new google.maps.DirectionsService();
-        //this.directionsDisplay = new google.maps.DirectionsRenderer();
-
-        //this.directionsDisplay.setMap(this.map);
-        //this.directionsDisplay.setPanel(this.directionsPanel.nativeElement);
-
+        
         this.radiusCircle = new google.maps.Circle({
           strokeColor: '#3171e0',
           strokeOpacity: 0.8,
@@ -223,7 +193,9 @@ export class CoffeeMapPage implements OnInit, AfterViewInit {
           center: new google.maps.LatLng(this.currentLat, this.currentLng),
           radius: this.radius
         });
-
+        this.geocoder = new google.maps.Geocoder();
+        this.placesService = new google.maps.places.PlacesService(this.map);
+        this.directionsService = new google.maps.DirectionsService();
         this.nearbySearch();
         loader.dismiss();
       });
@@ -238,8 +210,9 @@ export class CoffeeMapPage implements OnInit, AfterViewInit {
       position: location
     });
     google.maps.event.addListener(marker, 'click', (event) => {
-      this.map.panTo(marker.getPosition());
       this.setSelected(index);
+      this.map.panTo(marker.getPosition());
+      
     });
     this.markers.push(marker);
   }
@@ -266,10 +239,11 @@ export class CoffeeMapPage implements OnInit, AfterViewInit {
         if (detailEvent.data) {
           console.log((detailEvent.data['favorite']) ? 'favorite' : 'directions');
           if (detailEvent.data != undefined) console.log(detailEvent);
-          if (detailEvent.data['favorite']) this.toggleFavorite(<google.maps.places.PlaceResult>detailEvent.data.favorite);
+          if (detailEvent.data === 'favorite-cleared') this.showFavoriteToast('Favorite location was cleared!');
+          if (detailEvent.data === 'favorite-set') this.showFavoriteToast('Favorite location set!');
           if (detailEvent.data.lat && detailEvent.data.lng) this.getDirections(detailEvent.data.lat, detailEvent.data.lng);
         }
-      }, 250);
+      }, 300);
     }
     catch(e) { console.log(e) }
   }
@@ -298,35 +272,14 @@ export class CoffeeMapPage implements OnInit, AfterViewInit {
         });
   
         await loader.present();
-        console.log('radius returned: ', data.radius);
-        this.radius = data.radius;
-        this.radiusCircle.setCenter(this.currentLat, this.currentLng)
-        this.radiusCircle.setRadius(this.radius);
+
         this.map.panTo(new google.maps.LatLng(this.currentLat, this.currentLng));
-        this.markers = [];
+        this.radius = data.radius;
+        this.updateLocation();
         this.nearbySearch();
       }
     }
     catch(e) { console.log('radiusPopover() error: ', e) }
-  }
-
-  public toggleFavorite(event: google.maps.places.PlaceResult): void {
-    console.log('event: ', event);
-    //if (this.user && this.user.favorite && this.user.favorite.id === event.place_id) this.showRemoveFavoriteAlert();
-    this.addToFavorites(event);
-  }
-
-  private addToFavorites(place: google.maps.places.PlaceResult): void {
-    this.user.favorite = {
-      address: place.formatted_address,
-      icon: place.icon,
-      id: place.place_id,
-      name: place.name,
-      lat: place.geometry.location.lat(), 
-      lng: place.geometry.location.lng()
-    };
-    this.users.updateUserSettings(this.user);
-    this.showFavoriteToast(`${place.name} has been successfully stored as your favorite location!`);
   }
 
   public async nearbySearch() {
@@ -343,7 +296,9 @@ export class CoffeeMapPage implements OnInit, AfterViewInit {
       this.placesService.nearbySearch(searchReq, (results: google.maps.places.PlaceResult[], status) => {
         if (status == google.maps.places.PlacesServiceStatus.OK) {
           if (results.length > 0) {
+            this.clearMarkers();
             this.venues = results;
+            //console.log(this.venues.length);
             for (let venue of this.venues) {
               const location = venue.geometry.location;
               this.createMarker(location.lat(), location.lng(), this.venues.indexOf(venue));
@@ -437,6 +392,10 @@ export class CoffeeMapPage implements OnInit, AfterViewInit {
     catch(e) { console.log('hideAdmob() error: ', e) }
   }
 
+  clearMarkers() {
+    for (let marker of this.markers) marker.setMap(null);
+    this.venues = [];
+  }
 
   get isCordova(): boolean { return this.platform.is('cordova') }
 }

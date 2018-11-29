@@ -15,7 +15,7 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content padding [ngSwitch]="isGrid">
+<ion-content padding [ngSwitch]="isGrid" [scrollEvents]="true">
   <ion-fab 
     *ngIf="platform.is('desktop'); else pullToRefresh" 
     horizontal="end" 
@@ -49,7 +49,7 @@
   <ion-list>
     <ion-list-header>
       <ion-label>
-        <h1>{{ selectedFeed.title }}</h1>
+        <h1>{{ selectedTitle }}</h1>
         <h6>
           <ion-text>{{ currentFeed?.feed.link}}</ion-text>
         </h6>
@@ -87,24 +87,7 @@
         </ion-col>
       </ion-row>
     </ion-grid>
-    <!--<ion-card color="light" *ngFor="let item of currentFeed.items">
-      <ion-card-header color="light">
-        <ion-toolbar color="light">
-            <ion-thumbnail slot="start" margin-end>
-              <ion-img [src]="item?.thumbnail"></ion-img>
-            </ion-thumbnail>
 
-          <ion-card-title><a [href]="item.link">{{ item?.title }}<ion-icon padding-start name="open"></ion-icon></a></ion-card-title>
-          <ion-card-subtitle>{{ item?.pubDate | date:'dd-MM-yyyy' }}</ion-card-subtitle>
-        </ion-toolbar>
-      </ion-card-header>
-
-      <ion-card-content color="light">
-        <p>
-          {{ item?.description | sanitizeHtml }} 
-        </p>
-      </ion-card-content>
-    </ion-card>-->
     <ng-template #listView>
       <ion-item 
         button 
@@ -125,5 +108,7 @@
     
 
   </ion-list>
-  <!--<p>If you get lost, the <a target="_blank" rel="noopener" href="https://ionicframework.com/docs">docs</a> will be your guide.</p>-->
+  
+  <!--<ng-adsense id="adsense" [adClient]="adClient" [adSlot]="adSlot"></ng-adsense>-->
 </ion-content>
+<adsense-banner></adsense-banner>

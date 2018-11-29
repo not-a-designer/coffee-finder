@@ -1,15 +1,13 @@
-import { Component, 
-         EventEmitter, 
-         Input, 
-         OnInit, 
-         Output }                               from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 
-import { NavParams, ModalController, Platform, AlertController } from '@ionic/angular';
+import { AlertController, 
+         ModalController,
+         NavParams, 
+         Platform }          from '@ionic/angular';
 
-import { AuthService }                          from '@app-services/auth/auth.service';
-import { UserService }                          from '@app-services/user/user.service';
-import { CoffeeUser }                           from '@app-interfaces/coffee-user';
-import { TouchSequence } from 'selenium-webdriver';
+import { AuthService }       from '@app-services/auth/auth.service';
+import { UserService }       from '@app-services/user/user.service';
+import { CoffeeUser }        from '@app-interfaces/coffee-user';
 
 
 declare const google: any;
@@ -56,11 +54,9 @@ export class VenueDetailsCardComponent implements OnInit {
     //console.log(this.cityStateZip);
   }
 
-  async dismiss() {
-    await this.modalCtrl.dismiss();
-  }
+  public dismiss(): void { this.modalCtrl.dismiss() }
 
-  getDirections() {
+  public getDirections(): void {
     const data = { 
       lat: this.venue.geometry.location.lat(), 
       lng: this.venue.geometry.location.lng() 
@@ -69,8 +65,16 @@ export class VenueDetailsCardComponent implements OnInit {
   }
 
   public addFavorite(): void { 
-    const data = { favorite: this.venue };
-    this.modalCtrl.dismiss(data);
+    this.user.favorite = {
+      address: this.venue.formatted_address,
+      icon: this.venue.icon,
+      id: this.venue.place_id,
+      name: this.venue.name,
+      lat: this.venue.geometry.location.lat(), 
+      lng: this.venue.geometry.location.lng()
+    };
+    this.users.updateUserSettings(this.user);
+    this.modalCtrl.dismiss({ data: 'favorite-set' });
   }
 
   public async showRemoveFavoriteAlert(): Promise<void> {
@@ -88,7 +92,7 @@ export class VenueDetailsCardComponent implements OnInit {
           handler: () => {
             this.user.favorite = null;
             this.users.updateUserSettings(this.user);
-            this.modalCtrl.dismiss();
+            this.modalCtrl.dismiss({ data: 'favorite-cleared' });
           }
         }]
       });

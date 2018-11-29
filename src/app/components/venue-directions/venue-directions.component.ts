@@ -21,9 +21,6 @@ export class VenueDirectionsComponent implements OnInit {
   @ViewChild('directionsMap') 
   public mapElement: ElementRef;
 
-  //@ViewChild('directionsPanel') 
-  //directionsPanel: ElementRef;
-
   public map: any;
   public directions: google.maps.DirectionsResult;
   public  directionsDisplay: any;
@@ -73,8 +70,6 @@ export class VenueDirectionsComponent implements OnInit {
     catch(e) { console.log(e) }
   }
 
-  public dismiss(): void {
-    this.modalCtrl.dismiss();
-  }
+  public dismiss(): void { this.modalCtrl.dismiss() }
 
 }

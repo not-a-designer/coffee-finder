@@ -68,7 +68,7 @@ export class UserSettingsPage implements OnInit {
 
   private async verificationEmailToast(email: string): Promise<void> {
     try {
-      console.log('verification email sent');
+      //console.log('verification email sent');
       const verifyToast = await this.toastCtrl.create({
         message: `Please check your ${email} inbox to verify you account`,
         position: 'middle',
@@ -232,7 +232,7 @@ export class UserSettingsPage implements OnInit {
   public async showRemoveFavoriteAlert(): Promise<void> {
     try {
       const alert = await this.alertCtrl.create({
-        header: 'remove Favorite',
+        header: 'Remove Favorite',
         message: 'Are you sure you want to remove this location as your favorite?',
         buttons: [{
           text: 'Cancel',

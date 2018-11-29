@@ -25,11 +25,7 @@ export class RadiusSliderComponent implements OnInit {
   }
 
   public async dismiss(): Promise<void> {
-    try {
-      const data = { radius: this.radius }
-      await this.popoverCtrl.dismiss(data);
-    }
-    catch(e) { console.log('dismiss error: ', e) }
+      const data = { radius: this.radius };
+      this.popoverCtrl.dismiss(data);
   }
-
 }
