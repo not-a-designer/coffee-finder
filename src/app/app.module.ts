@@ -19,7 +19,6 @@ import { StatusBar }                           from '@ionic-native/status-bar/ng
 import { TwitterConnect }                      from '@ionic-native/twitter-connect/ngx';
 
 import { AgmCoreModule, GoogleMapsAPIWrapper } from '@agm/core';
-import { AgmSnazzyInfoWindowModule }           from '@agm/snazzy-info-window';
 
 import { AdsenseModule }                       from 'ng2-adsense';
 
@@ -30,7 +29,6 @@ import { PipesModule }                         from '@app-pipes/pipes.module';
 import { AppComponent }                        from './app.component';
 import { AuthService }                         from '@app-services/auth/auth.service';
 import { AuthGuard }                           from '@app-services/auth/auth.guard';
-import { FourSquareService }                   from '@app-services/four-square/four-square.service';
 import { MapService }                          from '@app-services/map/map.service';
 import { RssFeedService }                      from '@app-services/rss-feed/rss-feed.service';
 import { StorageService }                      from '@app-services/storage/storage.service';
@@ -50,8 +48,11 @@ import { UserService }                         from '@app-services/user/user.ser
     AngularFireAuthModule,
     AngularFirestoreModule,
     AppRoutingModule,
-    AgmCoreModule.forRoot({ apiKey: environment.firebase.apiKey }),
-    AgmSnazzyInfoWindowModule,
+    AgmCoreModule.forRoot({
+      apiKey: environment.firebase.apiKey,
+      libraries: ['places'],
+      language: 'en-US'
+    }),
     AdsenseModule.forRoot({
       adClient: environment.adSenseConfig.google_ad_client,
       adSlot: environment.adSenseConfig.google_ad_slot,
@@ -66,7 +67,7 @@ import { UserService }                         from '@app-services/user/user.ser
     AuthService,
     AuthGuard,
     Facebook,
-    FourSquareService,
+    //FourSquareService,
     Geolocation,
     GoogleMapsAPIWrapper,
     GooglePlus,

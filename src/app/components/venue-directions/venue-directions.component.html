@@ -1,0 +1,55 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Directions to {{ destination }}</ion-title>
+    
+
+    <ion-buttons slot="end">
+      <ion-button icon-only fill="clear" (click)="dismiss()">
+        <ion-icon name="close"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+    
+  <ion-toolbar color="primary">
+    <ion-label margin-start>Total distance: {{ directions.routes[0].legs[0].distance.text }}</ion-label>
+    <ion-buttons slot="end">
+      <ion-label margin-end>{{ routeSteps.length }} steps</ion-label>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-card>
+    <ion-card-header no-padding>
+        <div #directionsMap id="directions-map"></div>
+    </ion-card-header>
+    <ion-card-content text-center>
+      <ion-list>
+        <ion-item-divider color="medium" text-center>
+          <ion-label>
+            Departing from {{ directions.routes[0].legs[0].start_address }}
+          </ion-label>
+        </ion-item-divider>
+        <ion-item *ngFor="let step of routeSteps; let i = index" lines="full">
+          <ion-icon class="direction-icon" slot="start" *ngIf="step.maneuver; else noIcon" [name]="step.maneuver === 'turn-right' ? 'return-right' : 'return-left'"></ion-icon>
+          <ng-template #noIcon>
+            <ion-icon slot="start" name="arrow-dropup"></ion-icon>
+          </ng-template>
+
+          <ion-label text-wrap>
+            <span float-start>{{ i + 1 }}.&nbsp;</span>
+            {{ step.instructions | sanitizeDirections }}
+          </ion-label>
+          <ion-note slot="end">
+            {{ step.distance.text }}
+          </ion-note>
+        </ion-item>
+        <ion-item-divider color="medium" text-center>
+          <ion-label>
+            Arrving at {{ directions.routes[0].legs[0].end_address }}
+          </ion-label>
+        </ion-item-divider>
+      </ion-list>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

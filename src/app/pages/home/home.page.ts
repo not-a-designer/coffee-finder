@@ -1,12 +1,19 @@
-import { Component, OnInit }                from '@angular/core';
+import { AfterViewInit, Component, OnInit }             from '@angular/core';
 
-import { Platform }                         from '@ionic/angular';
+import { Platform, LoadingController, ToastController } from '@ionic/angular';
 
-import { Observable }                       from 'rxjs';
+import { Observable }                                   from 'rxjs';
 
-import { AuthService }                      from '@app-services/auth/auth.service';
-import { RssFeedService }                   from '@app-services/rss-feed/rss-feed.service';
-import { CoffeeUser }                       from '@app-interfaces/coffee-user';
+import { AuthService }                                  from '@app-services/auth/auth.service';
+import { RssFeedService, RSSResult }                    from '@app-services/rss-feed/rss-feed.service';
+import { CoffeeUser }                                   from '@app-interfaces/coffee-user';
+
+
+interface RssData {
+  url: string;
+  name: string;
+  title: string;
+};
 
 
 @Component({
@@ -14,40 +21,132 @@ import { CoffeeUser }                       from '@app-interfaces/coffee-user';
   templateUrl: 'home.page.html',
   styleUrls: ['home.page.scss']
 })
-export class HomePage implements OnInit {
+export class HomePage implements AfterViewInit, OnInit {
 
-  user$: Observable<CoffeeUser>;
-  sprudgeUrl: string = 'http://sprudge.com/feed';
+  public user$: Observable<CoffeeUser>;
+  
+  public feeds: Array<RssData> = [
+    {
+      url: 'https://sprudge.com/feed/',
+      name: 'sprudge',
+      title: 'Sprudge'
+    }, {
+      url: 'https://dailycoffeenews.com/feed/',
+      name: 'dcn',
+      title: 'Daily Coffee News by Roast Magazine'
+    }, {
+      url: 'https://blog.pactcoffee.com/feed/',
+      name: 'pcb',
+      title: 'The Perc'
+    }, {
+      url: 'https://www.reddit.com/r/Coffee/.rss',
+      name: 'rcoffee',
+      title: 'Coffee'
+    }, {
+      url: 'https://perfectdailygrind.com/feed',
+      name: 'pdg',
+      title: 'Perfect Daily Grind'
+    }, {
+      url: 'https://www.coffeereview.com/feed/',
+      name: 'coffeereview',
+      title: 'Coffee Review'
+    }, {
+      url: 'https://colectivocoffee.com/feed',
+      name: 'colectivo',
+      title: 'Colectivo Coffee'
+    }
+  ];
+  public selectedFeed: RssData;
+  public selectedTitle: string;
 
-  newsList: Array<any>;
+  public currentFeed: RSSResult;
 
-  constructor(private auth: AuthService, private platform: Platform, private rssFeed: RssFeedService,) {}
+  public isGrid: boolean = true;
+
+  constructor(private auth: AuthService, 
+              public platform: Platform, 
+              private toastCtrl: ToastController,
+              private rssFeed: RssFeedService,
+              private loadingCtrl: LoadingController) {}
 
   public async ngOnInit(): Promise<void> { 
     try {
       this.user$ = this.auth.user$;
-      await this.getFeed(this.sprudgeUrl);
-      console.log(this.newsList.length);
+      this.selectedTitle = this.feeds[0].title;
+      this.setCurrentFeed(0, null);
     }
     catch(e) { console.log(e) }
   }
 
-  public async googleLogin(): Promise<void> {
+  public async ngAfterViewInit() {
     try {
-      if (this.platform.is('cordova')) {
-        const user = await this.auth.googleLogin();
-        console.log({ user });
+      if (!this.platform.is('desktop')) {
+        const toast = await this.toastCtrl.create({
+          message: 'Pull down to refresh',
+          position: 'top',
+          duration: 2000
+        });
+        await toast.present();
       }
     }
-    catch(e) { console.log('googleLogin() error: ', e) }
+    catch(e) { console.log(e) }
   }
 
-  public async getFeed(url: string) {
+  public doRefresh(event) {
+    //console.log({ event });
+    //console.log('Refreshing news feed...');
+
+    setTimeout(() => {
+      this.getFeed();
+      event.target.complete();
+    }, 500);
+  }
+
+  public async setCurrentFeed(index: number, event) {
     try {
-      const feed = await this.rssFeed.getFeed(url, 25);
-      this.newsList = feed.items;
+      
+      const loader = await this.showLoader('Loading feed...');
+      await loader.present();
+
+      //console.log({ event });
+      this.selectedFeed = this.feeds[index];
+      this.selectedTitle = this.selectedFeed.title;
+      //console.log('current feed set: ', this.selectedFeed.title);
+      await this.getFeed();
+      loader.dismiss();
     }
     catch(e) { console.log(e) }
   }
 
+  public async getFeed(): Promise<void> {
+    try {
+      this.currentFeed = await this.rssFeed.getFeed(this.selectedFeed.url, '25');
+      //console.log(this.currentFeed.items.length);
+      //console.log( this.currentFeed.items[0] )
+    }
+    catch(e) { console.log(e) }
+  }
+
+  public async toggleView(): Promise<void> {
+    try {
+      const nextPosition: string = this.isGrid ? 'list' : 'grid';
+      const loader = await this.showLoader(`switching to ${nextPosition} view...`, 600)
+      await loader.present();
+
+      this.isGrid = !this.isGrid;
+      //console.log('view is grid: ', this.isGrid);
+    }
+    catch(e) { console.log(e) }
+  }
+
+  private async showLoader(msg: string, dur?: number): Promise<HTMLIonLoadingElement> {
+    try {
+      return await this.loadingCtrl.create({
+        message: msg,
+        spinner: 'circles',
+        duration: dur || null
+      });
+    }
+    catch(e) { console.log(e) }
+  }
 }

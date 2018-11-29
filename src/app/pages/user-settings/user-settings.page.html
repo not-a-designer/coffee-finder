@@ -71,7 +71,7 @@
             <ion-item *ngIf="user.favorite; else noFavorite">
               <ion-label>
                 <h2>{{ user.favorite.name }}</h2>
-                <p>{{ user.favorite.location.formattedAddress[1] }}</p>
+                <p>{{ user.favorite.address }}</p>
               </ion-label>
               <ion-button 
                 no-padding 
@@ -216,14 +216,15 @@
     </form>
     
   </ion-card>
-  <ion-toolbar fullscreen color="light" id="copy-toolbar" no-padding>
+  
+  <ion-label text-center color="medium"><h6>&copy;&nbsp;Copyright 2018</h6></ion-label>
+
+  <ion-toolbar color="light" id="copy-toolbar" no-padding>
       <ion-item color="light" no-margin no-padding lines="none" id="copyright-info">
         <ion-button slot="start" fill="clear" href="/tabs/(settings:tos)">
           Terms of Service
         </ion-button>
-  
-        <ion-label text-center color="medium"><h6>&copy;&nbsp;Copyright 2018</h6></ion-label>
-  
+
         <ion-button slot="end" fill="clear" href="/tabs/(settings:privacy)">
           Privacy Policy
         </ion-button>
@@ -232,4 +233,5 @@
   <br />
   <br />
   <br />
+  
 </ion-content>

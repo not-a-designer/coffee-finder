@@ -2,17 +2,17 @@ import { Component,
          EventEmitter, 
          Input, 
          OnInit, 
-         Output }                    from '@angular/core';
+         Output }                               from '@angular/core';
 
-import { ModalController, Platform } from '@ionic/angular';
+import { NavParams, ModalController, Platform, AlertController } from '@ionic/angular';
 
-import { Venue, VenueDetails }       from '@app-interfaces/foursquare/venue';
-import { AuthService }               from '@app-services/auth/auth.service';
-import { FourSquareService }         from '@app-services/four-square/four-square.service';
-import { UserService }               from '@app-services/user/user.service';
-import { CoffeeUser }                from '@app-interfaces/coffee-user';
-import { NavParams }                 from '@ionic/angular';
+import { AuthService }                          from '@app-services/auth/auth.service';
+import { UserService }                          from '@app-services/user/user.service';
+import { CoffeeUser }                           from '@app-interfaces/coffee-user';
+import { TouchSequence } from 'selenium-webdriver';
 
+
+declare const google: any;
 
 
 @Component({
@@ -22,23 +22,18 @@ import { NavParams }                 from '@ionic/angular';
 })
 export class VenueDetailsCardComponent implements OnInit {
 
-  //@Input('venue') 
-  public venue: Venue;
-
-  //@Input('user')
+  public venue: google.maps.places.PlaceResult;
   public user: CoffeeUser;
 
-  @Output('toggleFavorite') 
-  public toggleFavorite: EventEmitter<Venue> = new EventEmitter<Venue>();
-
-  //details: VenueDetails = null;
   public venueCatIcon: string = '';
+  public streetAddress: string = '';
+  public cityStateZip: string = '';
 
   constructor(private navParams: NavParams, 
+              private alertCtrl: AlertController,
               private modalCtrl: ModalController,
               public platform: Platform,
               private auth: AuthService,
-              private foursquare: FourSquareService, 
               private users: UserService) {
     
   }
@@ -46,29 +41,61 @@ export class VenueDetailsCardComponent implements OnInit {
   async ngOnInit(): Promise<void> {
     this.auth.user$.subscribe((u) => this.user = u)
     this.venue = this.navParams.get('venue');
-    console.log(this.venue.location.formattedAddress.length)
-    //console.log('info window', this.user);
-    //console.log(this.user ? this.user.uid : 'null');
-    //this.user$ = this.auth.user$;
-    console.log('venue categories: ', this.venue.categories.length);
-    const firstCat = this.venue.categories[0];
-    console.log(this.venueCatIcon);
-    this.venueCatIcon = firstCat.icon.prefix.concat('bg_32', firstCat.icon.suffix);
-    console.log(this.venueCatIcon);
-    //this.venueCatIcon = await this.foursquare.getVenueCategories()
-    /*try { 
-      this.venue = this.navParams.get('venue');
-      //this.details = await this.foursquare.getVenueDetails(this.venue.id);
-      //console.dir(this.details.bestPhoto);
-    }
-    catch(e) { console.log('component error: ', e) }*/
+    //console.log('venue cmp: ', this.venue);
+
+
+    this.venueCatIcon = this.venue.icon;
+    this.venue.address_components.forEach((comp) => {
+      if (comp.types.includes('street_number')) this.streetAddress += comp.short_name;
+      if (comp.types.includes('route')) this.streetAddress += ` ${comp.short_name}`;
+      if (comp.types.includes('locality')) this.cityStateZip += comp.short_name;
+      if (comp.types.includes('administrative_area_level_1')) this.cityStateZip += `, ${comp.short_name}`;
+      if (comp.types.includes('postal_code')) this.cityStateZip += ` ${comp.short_name}`;
+    });
+    //console.log(this.streetAddress);
+    //console.log(this.cityStateZip);
   }
 
   async dismiss() {
     await this.modalCtrl.dismiss();
   }
 
-  public addFavorite(): void { this.toggleFavorite.emit(this.venue) }
+  getDirections() {
+    const data = { 
+      lat: this.venue.geometry.location.lat(), 
+      lng: this.venue.geometry.location.lng() 
+    };
+    this.modalCtrl.dismiss(data);
+  }
+
+  public addFavorite(): void { 
+    const data = { favorite: this.venue };
+    this.modalCtrl.dismiss(data);
+  }
+
+  public async showRemoveFavoriteAlert(): Promise<void> {
+    try {
+      const alert = await this.alertCtrl.create({
+        header: 'remove Favorite',
+        message: 'Are you sure you want to remove this location as your favorite?',
+        buttons: [{
+          text: 'Cancel',
+          role: 'cancel',
+          handler: () => console.log('cancel, keep favorite')
+        }, {
+          text: 'Remove',
+          role: 'destructive',
+          handler: () => {
+            this.user.favorite = null;
+            this.users.updateUserSettings(this.user);
+            this.modalCtrl.dismiss();
+          }
+        }]
+      });
+      await alert.present();
+    }
+    catch(e) { console.log('showRemoveFavoriteAlert() error: ', e) }
+  }
 
   get isSmall(): boolean { return this.platform.width() > 692 }
 }

@@ -1,9 +1,13 @@
-import { IonicModule }          from '@ionic/angular';
-import { RouterModule, Routes } from '@angular/router';
+
 import { NgModule }             from '@angular/core';
+import { RouterModule, Routes } from '@angular/router';
 import { CommonModule }         from '@angular/common';
 import { FormsModule }          from '@angular/forms';
+
+import { IonicModule }          from '@ionic/angular';
+
 import { HomePage }             from '@app-pages/home/home.page';
+import { PipesModule }          from '@app-pipes/pipes.module';
 
 
 const routes: Routes = [{ path: '', component: HomePage }];
@@ -14,7 +18,8 @@ const routes: Routes = [{ path: '', component: HomePage }];
     IonicModule,
     CommonModule,
     FormsModule,
-    RouterModule.forChild(routes)
+    RouterModule.forChild(routes),
+    PipesModule
   ],
 
   declarations: [ HomePage ],

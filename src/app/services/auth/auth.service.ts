@@ -234,56 +234,6 @@ export class AuthService {
   /*********************************************************************/
   /**                          ALERT METHODS                          **/
   /*********************************************************************/
-
-  /**
-   * @public showResetPasswordAlert()
-   * - shows Alert with email prompt
-   * - if the email is valid AngularFireAuth will send a reset email
-   * @returns Promise<void>
-   */
-  /*public async showResetPasswordAlert(): Promise<void> {
-    try {
-      const resetAlert = await this.alertCtrl.create({
-        header: 'Reset Password',
-        message: 'To reset your password, enter the your account email',
-        inputs: [{
-          type: 'email',
-          name: 'email',
-          placeholder: 'Email address'
-        }],
-        buttons: [{
-          text: 'Cancel',
-          role: 'cancel',
-          handler: () => console.log('cancel password reset')
-        }, {
-          text: 'Reset',
-          handler: async (data) => {
-            const loader = await this.loadingCtrl.create({ message: 'resetting...' })
-            try { 
-              if (EMAIL_REGEXP.test(data.email)) {
-                loader.dismiss();
-                await this.resetPassword(data.email);
-                await this.passwordResetSuccessAlert(data.email);
-              }
-            }
-            catch(e) { 
-              loader.dismiss()
-              console.log(e.code);
-              await this.showErrorAlert(e);
-              console.log('showResetPasswordAlert() error: ', e);
-            }
-          }
-        }]
-      });
-
-      await resetAlert.present();
-    }
-    catch(e) { 
-      console.log(e.code);
-      await this.showErrorAlert(e);
-      console.log('showResetPasswordAlert() error: ', e) }
-  }*/
-
   public async reauthenticateWithCredential(password: string): Promise<firebase.auth.UserCredential> {
     try {
       return await this.afAuth.auth.currentUser.reauthenticateAndRetrieveDataWithCredential(
@@ -308,7 +258,6 @@ export class AuthService {
       console.log('reauthenticateWithPopup() error: ', e);
     }
   }
-
 
   /**
    * @public resetPassword()
@@ -501,8 +450,4 @@ export class AuthService {
     }
     catch(e) { console.log('passwordSuccessToast error: ', e) }
   }
-
-
-
-  
 }

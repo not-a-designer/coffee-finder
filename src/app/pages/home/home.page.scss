@@ -1,1 +1,13 @@
+a {
+    text-decoration: none;
+}
 
+ion-card {
+    min-height: 210px;
+    height: auto;
+    --padding-bottom: 0;
+
+    ion-card-title {
+        text-overflow: ellipsis;
+    }
+}

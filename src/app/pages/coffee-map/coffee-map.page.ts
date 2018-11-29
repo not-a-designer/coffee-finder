@@ -1,5 +1,6 @@
 import { AfterViewInit, 
          Component, 
+         ElementRef,
          OnInit, 
          ViewChild }                        from '@angular/core';
 
@@ -11,31 +12,48 @@ import { LoadingController,
          ModalController}                   from '@ionic/angular';
 import { AdMobFree, AdMobFreeBannerConfig } from '@ionic-native/admob-free/ngx';
 
-import { MapsAPILoader, AgmMap }            from '@agm/core';
+import { MapsAPILoader }                    from '@agm/core';
 
 import { take }                             from 'rxjs/operators';
 
 import { environment }                      from '@environments/environment.prod';
-import { Venue, VenueDetails }              from '@app-interfaces/foursquare/venue';
-import { FourSquareService }                from '@app-services/four-square/four-square.service';
 import { MapService }                       from '@app-services/map/map.service';
 import { RadiusSliderComponent }            from '@app-components/radius-slider/radius-slider.component';
 import { CoffeeUser }                       from '@app-interfaces/coffee-user';
 import { UserService }                      from '@app-services/user/user.service';
 import { AuthService }                      from '@app-services/auth/auth.service';
-import { VenueDetailsCardComponent } from '@app-components/venue-details-card/venue-details-card.component';
+import { VenueDetailsCardComponent }        from '@app-components/venue-details-card/venue-details-card.component';
+import { VenueDirectionsComponent }         from '@app-components/venue-directions/venue-directions.component';
 
 
 declare const google: any;
 
-const MARKER_LABEL: string = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-
-interface MyMarker {
-  lat: number;
-  lng: number;
-  label: string;
-  draggable: boolean
-};
+const FIELDS: string[] = [ 
+  'address_components',
+  'adr_address',
+  'alt_id',
+  'formatted_address', 
+  //'formatted_phone_number', // CONTACT
+  'geometry', 
+  'icon', 
+  'id', 
+  //'international_phone_number', // CONTACT
+  'name', 
+  //'opening_hours', // CONTACT
+  'permanently_closed', 
+  'photos', 
+  'place_id', 
+  'plus_code',
+  //'price_level, // ATOMSPHERE
+  //'rating', // ATMOSPHERE
+  //'review', // ATMOSPHERE
+  'scope',
+  'type',
+  'url',
+  'utc_offset',
+  'vicinity',
+  //'website' // CONTACT
+];
 
 
 @Component({
@@ -45,20 +63,27 @@ interface MyMarker {
 })
 export class CoffeeMapPage implements OnInit, AfterViewInit {
 
-  @ViewChild(AgmMap) 
-  public map: AgmMap;
+  //@ViewChild(AgmMap) 
+  //public agmMap: AgmMap;
+  @ViewChild('map') mapElement: ElementRef;
+  
 
-  selectedVenue: Venue;
-  details: VenueDetails;
-  venues: Venue[] = [];
-  markers: MyMarker[] = [];
+  selectedVenue: google.maps.places.PlaceResult;
+  details: google.maps.places.PlaceResult;
+  venues: google.maps.places.PlaceResult[] = [];
+  markers: any[] = [];
   adClient: string = environment.adSenseConfig.google_ad_client;
   adSlot: string = environment.adSenseConfig.google_ad_slot;
 
+  public map: any;
   public geocoder: any;
+  public directionsService: any;
+  //public directionsDisplay: any;
+  public placesService: any;
+  public radiusCircle: any;
 
-  public mapLat: number;
-  public mapLng: number;
+  //public mapLat: number;
+  //public mapLng: number;
   public currentLat: number;
   public currentLng: number;
   public mapZoom: number = 13;
@@ -73,6 +98,12 @@ export class CoffeeMapPage implements OnInit, AfterViewInit {
     bannerAtTop: false
   };
 
+  mapOptions = {
+    enableHighAccuracy: true,
+    timeout: 5000,
+    maximumAge: 0
+  };
+
   constructor(private mapsAPILoader: MapsAPILoader,
               private admob: AdMobFree, 
               private loadingCtrl: LoadingController,
@@ -82,7 +113,6 @@ export class CoffeeMapPage implements OnInit, AfterViewInit {
               private popoverCtrl: PopoverController,
               private toastCtrl: ToastController,
               private auth: AuthService,
-              private foursquare: FourSquareService,
               private maps: MapService,
               private users: UserService) { }
 
@@ -91,59 +121,55 @@ export class CoffeeMapPage implements OnInit, AfterViewInit {
     this.startAdmob();
     this.auth.user$.pipe(take(1)).subscribe((user) => this.user = user);
     this.selectedVenue = null;
-    this.maps.lat.subscribe((latitude: number) => {
-      this.currentLat = latitude;
-      this.mapLat = latitude;
-    });
-    this.maps.lng.subscribe((longitude: number) => {
-      this.currentLng = longitude;
-      this.mapLng = longitude;
-    });
-    this.maps.zoom.subscribe((z) => this.mapZoom = z);
-    this.loadMap();
     this.getCurrentLocation();
+
+    
+    this.loadMap();
   }
 
   public ngAfterViewInit(): void {
-    //if (this.selectedVenue) this.selectedVenue = null;
+    this.maps.lat.subscribe((latitude: number) => {
+      this.currentLat = latitude;
+      //this.mapLat = latitude;
+    });
+    this.maps.lng.subscribe((longitude: number) => {
+      this.currentLng = longitude;
+      //this.mapLng = longitude;
+    });
+    this.maps.zoom.subscribe((z) => this.mapZoom = z);
   }
 
   async getCurrentLocation(): Promise<void> {
     try {
-      this.selectedVenue = null;
-      const loader = await this.loadingCtrl.create({
-        spinner: 'circles',
-        message: 'loading map...',
-        keyboardClose: true,
-        duration: 500
-      });
-
-      await loader.present();
-
       if (this.platform.is('cordova')) await this.maps.getNativePosition();
       else await this.maps.getBrowserPosition();
-
-      setTimeout(async () => {
-        this.venues = await this.foursquare.searchVenues('browse', this.radius);
-        for (let venue of this.venues) this.createMarker(venue);
-        loader.dismiss();
-      }, 750);
     }
     catch(e) { console.log('getCurrentPosition() error: ', e) }
   }
 
+  async updateLocation() {
+    try {
+      const loader = await this.loadingCtrl.create({ message: 'locating...', spinner: 'circles' });
+      await loader.present();
+      this.getCurrentLocation();
+      this.map.panTo(new google.maps.LatLng(this.currentLat, this.currentLng));
+      this.nearbySearch();
+      loader.dismiss();
+    }
+    catch(e) { console.log(e) }
 
-  public async selectMarker(event, markerIndex: number): Promise<void> { 
+  }
+  /*public async selectMarker(event, markerIndex: number): Promise<void> { 
     try { 
       console.log(`{ lat: ${event.latitude}, lng: ${event.longitude} }`);
-      const venueMarker: Venue = this.venues[markerIndex];
+      const venueMarker = this.venues[markerIndex];
 
       console.log(`setting selectedVenue to ${venueMarker.name}`);
       console.log('map', this.user);
       this.selectedVenue = venueMarker;
       this.mapLat = event.latitude;
       this.mapLng = event.longitude;
-      this.maps.panTo(event.latitude, event.longitude);
+      //await this.mapsAPIWrapper.panTo(new google.maps.LatLng(event.latitude, event.longitude));
 
       const modal = await this.modalCtrl.create({
         component: VenueDetailsCardComponent,
@@ -155,26 +181,97 @@ export class CoffeeMapPage implements OnInit, AfterViewInit {
       return await modal.present();    
     }
     catch(e) { console.log('selectMarker() error: ', e) }
-  }
+  }*/
 
   public async loadMap(): Promise<void> {
     try {
+      this.selectedVenue = null;
+      const loader = await this.loadingCtrl.create({
+        spinner: 'circles',
+        message: 'loading map...',
+        keyboardClose: true,
+        duration: 500
+      });
+
+      await loader.present();
+
+      this.getCurrentLocation();
       await this.mapsAPILoader.load();
-      this.geocoder = new google.maps.Geocoder();
+      this.map = new google.maps.Map(this.mapElement.nativeElement, {
+        center: new google.maps.LatLng(this.currentLat, this.currentLng),
+        zoom: 13,
+        clickableIcons: false,
+        disableDefaultUI: true
+      });
+      this.map.panTo(new google.maps.LatLng(this.currentLat, this.currentLng));
+      google.maps.event.addListenerOnce(this.map, 'idle', () => {
+        this.geocoder = new google.maps.Geocoder();
+        this.placesService = new google.maps.places.PlacesService(this.map);
+        this.directionsService = new google.maps.DirectionsService();
+        //this.directionsDisplay = new google.maps.DirectionsRenderer();
+
+        //this.directionsDisplay.setMap(this.map);
+        //this.directionsDisplay.setPanel(this.directionsPanel.nativeElement);
+
+        this.radiusCircle = new google.maps.Circle({
+          strokeColor: '#3171e0',
+          strokeOpacity: 0.8,
+          strokeWeight: 2,
+          fillColor: '#3171e0',
+          fillOpacity: 0.35,
+          map: this.map,
+          center: new google.maps.LatLng(this.currentLat, this.currentLng),
+          radius: this.radius
+        });
+
+        this.nearbySearch();
+        loader.dismiss();
+      });
     }
     catch(e) { console.log('loadMap() error: ', e) }
   }
 
-  createMarker(venue: Venue): void {
-    let index : number = this.venues.indexOf(venue);
-    const newMarker: MyMarker = {
-      lat: venue.location.lat,
-      lng: venue.location.lng,
-      label: `${MARKER_LABEL.charAt(index)}`,
-      draggable: false
-    };
-    
-    this.markers.push(newMarker);
+  createMarker(lat: number, lng: number, index: number): void {
+    const location = { lat: lat, lng: lng }
+    const marker = new google.maps.Marker({
+      map: this.map,
+      position: location
+    });
+    google.maps.event.addListener(marker, 'click', (event) => {
+      this.map.panTo(marker.getPosition());
+      this.setSelected(index);
+    });
+    this.markers.push(marker);
+  }
+
+  async setSelected(index: number) {
+    try {
+      this.selectedVenue = this.venues[index];
+      await this.getDetails(this.selectedVenue);
+
+      setTimeout(async () => {
+        
+        const modal = await this.modalCtrl.create({
+          component: VenueDetailsCardComponent,
+          componentProps: { venue: this.details },
+          cssClass: 'info-modal',
+          backdropDismiss: true,
+          showBackdrop: true
+        });
+        
+        await modal.present();   
+
+        let detailEvent = await modal.onDidDismiss();
+        
+        if (detailEvent.data) {
+          console.log((detailEvent.data['favorite']) ? 'favorite' : 'directions');
+          if (detailEvent.data != undefined) console.log(detailEvent);
+          if (detailEvent.data['favorite']) this.toggleFavorite(<google.maps.places.PlaceResult>detailEvent.data.favorite);
+          if (detailEvent.data.lat && detailEvent.data.lng) this.getDirections(detailEvent.data.lat, detailEvent.data.lng);
+        }
+      }, 250);
+    }
+    catch(e) { console.log(e) }
   }
 
   public async showRadiusPopover(event): Promise<void> {
@@ -203,67 +300,110 @@ export class CoffeeMapPage implements OnInit, AfterViewInit {
         await loader.present();
         console.log('radius returned: ', data.radius);
         this.radius = data.radius;
-        
-        let limit: number;
-        switch(true) {
-          case (this.radius < 2400): {
-            limit = 10
-            break;
-          }
-          case (this.radius >= 2400 && this.radius < 4000):  { 
-            limit = 15;
-            break;
-          }
-          case (this.radius >= 4000): { 
-            limit = 20;
-            break;
-          }
-        }
-        console.log(limit);
+        this.radiusCircle.setCenter(this.currentLat, this.currentLng)
+        this.radiusCircle.setRadius(this.radius);
+        this.map.panTo(new google.maps.LatLng(this.currentLat, this.currentLng));
         this.markers = [];
-        this.venues = await this.foursquare.searchVenues('browse', this.radius, limit);
-        for (let venue of this.venues) this.createMarker(venue);
+        this.nearbySearch();
       }
     }
     catch(e) { console.log('radiusPopover() error: ', e) }
   }
 
-  public toggleFavorite(event: Venue): void {
+  public toggleFavorite(event: google.maps.places.PlaceResult): void {
     console.log('event: ', event);
-    if (this.user && this.user.favorite && this.user.favorite.id === event.id) this.showRemoveFavoriteAlert();
-    else this.addToFavorites(event);
+    //if (this.user && this.user.favorite && this.user.favorite.id === event.place_id) this.showRemoveFavoriteAlert();
+    this.addToFavorites(event);
   }
 
-  private addToFavorites(v: Venue): void {
-    this.user.favorite = v;
+  private addToFavorites(place: google.maps.places.PlaceResult): void {
+    this.user.favorite = {
+      address: place.formatted_address,
+      icon: place.icon,
+      id: place.place_id,
+      name: place.name,
+      lat: place.geometry.location.lat(), 
+      lng: place.geometry.location.lng()
+    };
     this.users.updateUserSettings(this.user);
-    this.showFavoriteToast(`${v.name} has been successfully stored as your favorite location!`);
+    this.showFavoriteToast(`${place.name} has been successfully stored as your favorite location!`);
   }
 
-  private async showRemoveFavoriteAlert(): Promise<void> {
+  public async nearbySearch() {
     try {
-      const alert = await this.alertCtrl.create({
-        header: 'remove Favorite',
-        message: 'Are you sure you want to remove this location as your favorite?',
-        buttons: [{
-          text: 'Cancel',
-          role: 'cancel',
-          handler: () => console.log('cancel, keep favorite')
-        }, {
-          text: 'Remove',
-          role: 'destructive',
-          handler: () => {
-            const prevLocation: Venue = this.user.favorite;
-            this.user.favorite = null;
-            this.users.updateUserSettings(this.user);
-            this.showFavoriteToast(`${prevLocation.name} has been removed as your favorite!`);
+      const loader = await this.loadingCtrl.create({ message: 'Loading coffeeshops...', spinner: 'circles' })
+      await loader.present();
+      console.log(this.radius);
+      const searchReq: google.maps.places.PlaceSearchRequest = {
+        location: new google.maps.LatLng(this.currentLat, this.currentLng),
+        radius: this.radius,
+        keyword: 'coffee'
+      };
+      await this.mapsAPILoader.load();
+      this.placesService.nearbySearch(searchReq, (results: google.maps.places.PlaceResult[], status) => {
+        if (status == google.maps.places.PlacesServiceStatus.OK) {
+          if (results.length > 0) {
+            this.venues = results;
+            for (let venue of this.venues) {
+              const location = venue.geometry.location;
+              this.createMarker(location.lat(), location.lng(), this.venues.indexOf(venue));
+            }
           }
-        }]
+        }
       });
-      await alert.present();
+      loader.dismiss();
     }
-    catch(e) { console.log('showRemoveFavoriteAlert() error: ', e) }
+    catch(e) { console.log(e) }
   }
+
+  public async getDetails(place: google.maps.places.PlaceResult): Promise<void> {
+    try {
+      const detailReq: google.maps.places.PlaceDetailsRequest = {
+        placeId: place.place_id,
+        fields: FIELDS
+      };
+
+      this.placesService.getDetails(detailReq, (result: google.maps.places.PlaceResult, status) => {
+        if (status == google.maps.places.PlacesServiceStatus.OK) {
+          console.log({ result });
+          this.details = result;
+        }
+      });
+    }
+    catch(e) { console.log(e) }
+  }
+
+  public getDirections(lat: number, lng: number) {
+    this.directionsService.route({
+      origin: new google.maps.LatLng(this.currentLat, this.currentLng),
+      destination:  new google.maps.LatLng(lat, lng),
+      travelMode: google.maps.TravelMode['DRIVING']
+    }, async (result: google.maps.DirectionsResult, status) => {
+      try { 
+        if (status == google.maps.DirectionsStatus.OK) {
+          //console.log({ result });
+          const loader = await this.loadingCtrl.create({ message: 'Loading directions...', spinner: 'circles', duration: 500 })
+          await loader.present();
+
+          const modal = await this.modalCtrl.create({
+            component: VenueDirectionsComponent,
+            componentProps: { 
+              dest: this.details.name,
+              latLng: new google.maps.LatLng(this.currentLat, this.currentLng),
+              directionsResult: result
+            },
+            cssClass: 'directions-modal',
+            animated: true
+          });
+          await modal.present();
+          //this.directionsDisplay.setDirections(result);
+        }
+      }
+      catch(e) { console.log(e) }
+    });
+  }
+
+  
 
   private async showFavoriteToast(msg: string): Promise<void> {
     try {
@@ -299,5 +439,4 @@ export class CoffeeMapPage implements OnInit, AfterViewInit {
 
 
   get isCordova(): boolean { return this.platform.is('cordova') }
-
 }

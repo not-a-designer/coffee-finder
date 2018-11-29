@@ -1,5 +1,4 @@
-import { ChangeDetectorRef, 
-         Component, 
+import { Component, 
          OnInit, 
          NgZone}                 from '@angular/core';
 import { Router }                from '@angular/router';
@@ -9,9 +8,6 @@ import { AlertController,
          Platform, 
          ToastController, 
          ActionSheetController } from '@ionic/angular';
-
-import { Observable }            from 'rxjs';
-import { take }                  from 'rxjs/operators';
 
 import * as firebase             from 'firebase/app';
 import * as moment               from 'moment';
@@ -23,7 +19,6 @@ import { AuthService,
 import { ThemeService }          from '@app-services/theme/theme.service';
 import { UserService }           from '@app-services/user/user.service';
 import { CoffeeUser }            from '@app-interfaces/coffee-user';
-import { Venue }                 from '@app-interfaces/foursquare/venue';
 
 
 @Component({
@@ -32,17 +27,14 @@ import { Venue }                 from '@app-interfaces/foursquare/venue';
   styleUrls: ['./user-settings.page.scss'],
 })
 export class UserSettingsPage implements OnInit {
-
-  //public user: User = null;
   
-  user: CoffeeUser = null;
-  linkedAccounts: Array<firebase.UserInfo> = [];
-  unlinkedAccounts: Array<any> = [...SOCIAL_MEDIA];
+  public user: CoffeeUser = null;
+  public linkedAccounts: Array<firebase.UserInfo> = [];
+  public unlinkedAccounts: Array<any> = [...SOCIAL_MEDIA];
   public changesSaved: boolean;
   public verifyMessageHidden: boolean;
 
   constructor(private router: Router, 
-              private cdr: ChangeDetectorRef,
               private zone: NgZone,
               private platform: Platform, 
               private actionsheetCtrl: ActionSheetController,
@@ -59,13 +51,6 @@ export class UserSettingsPage implements OnInit {
         this.user = user;
         
         this.getRemainingProviders();
-        
-        
-        //console.log(...this.unlinkedAccounts);
-          
-      //console.log(`CURRENT_ACCOUNT: ${this.user.currentProvider.providerId}`, this.user.currentProvider);
-        //this.user.providerData.forEach((provider) => console.log(`LINKED-ACCOUNTS: ${provider.providerId}: `, provider));
-        //this.unlinkedAccounts.forEach((account) => console.log(`UNLINKED-ACCOUNTS: ${account.providerId}:`, account));
       });
       this.changesSaved = true;
   }
@@ -211,7 +196,6 @@ export class UserSettingsPage implements OnInit {
 
       if (emailButton) buttonsArray.push(emailButton);
       buttonsArray.push(cancelButton);
-      console.log(...buttonsArray)
 
       const actionsheet = await this.actionsheetCtrl.create({
         header: 'Link account to',
@@ -258,10 +242,9 @@ export class UserSettingsPage implements OnInit {
           text: 'Remove',
           role: 'destructive',
           handler: () => {
-            const prevLocation: Venue = this.user.favorite;
             this.user.favorite = null;
             this.users.updateUserSettings(this.user);
-            this.showFavoriteToast(`${prevLocation.name} has been removed as your favorite!`);
+            this.showFavoriteToast('Favorite location has been cleared!');
           }
         }]
       });
@@ -283,9 +266,8 @@ export class UserSettingsPage implements OnInit {
   }
 
   private getRemainingProviders() {
-    //SOCIAL_MEDIA.forEach((media) => console.log('SOC', media.label));
     this.unlinkedAccounts = [...SOCIAL_MEDIA];
-    //this.unlinkedAccounts.forEach((acct) => console.log('reset', acct.providerId));
+    
     for (let p of this.user.providerData) {
       const match = this.unlinkedAccounts.find((acct) => acct.providerId === p.providerId);
       if (match) {

@@ -5,12 +5,10 @@ import { FormsModule }                      from '@angular/forms';
 import { IonicModule }                      from '@ionic/angular';
 
 import { AgmCoreModule }                    from '@agm/core';
-import { AgmSnazzyInfoWindowModule}         from '@agm/snazzy-info-window';
 
 import { AdsenseModule }                    from 'ng2-adsense';
 
 import { TabsPageRoutingModule }            from './tabs.router.module';
-
 import { TabsPage }                         from './tabs.page';
 import { HomePageModule }                   from '@app-pages/home/home.module';
 import { UserSettingsPageModule }           from '@app-pages/user-settings/user-settings.module';
@@ -28,8 +26,11 @@ import { TosPageModule }                    from '@app-pages/tos/tos.module';
     CommonModule,
     FormsModule,
     TabsPageRoutingModule,
-    AgmCoreModule.forRoot({ apiKey: environment.firebase.apiKey }),
-    AgmSnazzyInfoWindowModule,
+    AgmCoreModule.forRoot({
+      apiKey: environment.firebase.apiKey,
+      libraries: ['places'],
+      language: 'en-US'
+    }),
     AdsenseModule.forRoot({
       adClient: environment.adSenseConfig.google_ad_client,
       adSlot: environment.adSenseConfig.google_ad_slot,

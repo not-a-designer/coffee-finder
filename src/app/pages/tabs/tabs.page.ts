@@ -1,7 +1,5 @@
-import { Component }   from '@angular/core';
+import { Component }    from '@angular/core';
 import { Router }       from '@angular/router';
-
-import { ThemeService } from '@app-services/theme/theme.service';
 
 
 @Component({
@@ -11,5 +9,5 @@ import { ThemeService } from '@app-services/theme/theme.service';
 })
 export class TabsPage {
 
-  constructor(public router: Router, public themes: ThemeService) {}
+  constructor(public router: Router) {}
 }

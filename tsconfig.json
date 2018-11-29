@@ -12,6 +12,9 @@
       "es2017",
       "dom"
     ],
+    "types": [
+      "googlemaps"
+    ],
     "baseUrl": "./src",
     "paths": {
       "@app-animations/*": ["./app/animations/*"],

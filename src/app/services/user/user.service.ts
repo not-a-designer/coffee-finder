@@ -67,15 +67,6 @@ export class UserService {
       providerData: curProviderData,
       displayName: user.displayName || ''
     };
-    //console.log(Cuser);
     return Cuser;
-    /*return {
-      displayName: user.displayName || null,
-      email: user.email ? user.email : user.providerData[0].email,
-      emailVerified: user.emailVerified,
-      providerId: user.providerData[0].providerId,
-      isAdmin: false,
-      uid: user.uid,
-    };*/
   }  
 }

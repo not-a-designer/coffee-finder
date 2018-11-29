@@ -5,87 +5,27 @@
 </ion-header>
 
 <ion-content>
-  <ion-fab no-margin horizontal="end" vertical="top" slot="fixed" edge>
-    <ion-fab-button mini color="secondary" (click)="getCurrentLocation()">
+  <ion-fab 
+    horizontal="end" 
+    vertical="top" 
+    slot="fixed">
+    <ion-fab-button 
+      mini 
+      color="secondary" 
+      (click)="updateLocation()">
       <ion-icon name="locate"></ion-icon>
     </ion-fab-button>
-  </ion-fab>
 
-  <ion-fab horizontal="end" vertical="top" slot="fixed" margin-top>
-    <ion-fab-button mini color="secondary" (click)="showRadiusPopover($event)">
+    <ion-fab-button 
+      mini 
+      color="secondary" 
+      (click)="showRadiusPopover($event)"
+      margin-top>
       <ion-icon name="options"></ion-icon>
     </ion-fab-button>
-  </ion-fab>
+  </ion-fab>  
   
-
-  <agm-map 
-    #map
-    [latitude]="mapLat" 
-    [longitude]="mapLng" 
-    [zoom]="mapZoom" 
-    usePanning="true"
-    clickableIcons="false"
-    disableDefaultUI="true"
-    (mapClick)="selectedVenue = null">
-    
-   
-    <agm-circle 
-      [radius]="radius" 
-      [latitude]="currentLat" 
-      [longitude]="currentLng" 
-      fillOpacity="0.35" 
-      fillColor="#3171e0" 
-      strokeWeight="2" 
-      strokePosition="0"
-      strokeColor="#3171e0"
-      strokeOpacity="1">
-      <agm-marker 
-        [latitude]="currentLat" 
-        [longitude]="currentLng" 
-        iconUrl="https://maps.google.com/mapfiles/ms/micons/green-dot.png"
-        markerDragable="false"></agm-marker>
-    </agm-circle>
-
-    <agm-marker 
-      *ngFor="let marker of markers; index as i" 
-      [latitude]="marker.lat" 
-      [longitude]="marker.lng" 
-      markerDragable="false"
-      (markerClick)="selectMarker($event, i)">
-
-      
-
-      
-      <!--<agm-snazzy-info-window 
-        #infoWindow
-        [maxWidth]="800"
-        [latitude]="selectedVenue?.location.lat"
-        [longitude]="selectedVenue?.location.lng"
-        closeOnMapClick="true"
-        closeWhenOthersOpen="true"
-        showCloseButton="false"
-        openOnMarkerClick="true"
-        panOnOpen="true"
-        padding="0"
-        wrapperClass="snazzy-info-window">
-        <ng-template>
-         <venue-details-card [venue]="selectedVenue"></venue-details-card>
-        </ng-template>
-      </agm-snazzy-info-window>-->
-    </agm-marker>
-  </agm-map>
-
-  <!--<venue-details-card 
-    *ngIf="selectedVenue" 
-    [venue]="selectedVenue"
-    [user]="user"
-    (toggleFavorite)="toggleFavorite($event)">
-    <ion-fab id="close-info-window" horizontal="end" vertical="top" no-margin>
-      <ion-button size="small" fill="clear" icon-only (click)="this.selectedVenue = null">
-        <ion-icon color="light" name="close"></ion-icon>
-      </ion-button>
-    </ion-fab>
-  </venue-details-card>-->
+  <div id="map" #map></div>
   
   <ng2-adsense [adClient]="adClient" [adSlot]="adSlot"></ng2-adsense>
 </ion-content>

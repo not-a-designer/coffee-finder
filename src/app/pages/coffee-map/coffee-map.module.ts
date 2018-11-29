@@ -6,7 +6,6 @@ import { Routes, RouterModule }             from '@angular/router';
 import { IonicModule }                      from '@ionic/angular';
 
 import { AgmCoreModule }                    from '@agm/core';
-import { AgmSnazzyInfoWindowModule }        from '@agm/snazzy-info-window';
 
 import { AdsenseModule }                    from 'ng2-adsense';
 
@@ -24,8 +23,11 @@ const routes: Routes = [{ path: '', component: CoffeeMapPage }];
     FormsModule,
     IonicModule,
     RouterModule.forChild(routes),
-    AgmCoreModule.forRoot({ apiKey: environment.firebase.apiKey }),
-    AgmSnazzyInfoWindowModule,
+    AgmCoreModule.forRoot({
+      apiKey: environment.firebase.apiKey,
+      libraries: ['places'],
+      language: 'en-US'
+    }),
     AdsenseModule.forRoot({
       adClient: environment.adSenseConfig.google_ad_client,
       adSlot: environment.adSenseConfig.google_ad_slot,

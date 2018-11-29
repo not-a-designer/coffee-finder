@@ -1,31 +1,129 @@
 <ion-header>
   <ion-toolbar color="primary">
-    <ion-title>Home</ion-title>
-
-    <ion-buttons slot="end">
-      <ion-button *ngIf="!(user$ | async)" href="/tabs/(settings:login)">
-        Login
-        <ion-icon slot="end" name="log-in"></ion-icon>
-      </ion-button>
-    </ion-buttons>
+    <ion-title>Coffee News</ion-title>
+  </ion-toolbar>
+  
+  <ion-toolbar color="primary">
+    <ion-segment [(ngModel)]="selectedTitle" scrollable="true">
+      <ion-segment-button 
+        *ngFor="let feed of feeds; let i = index"   
+        [value]="feed.title" 
+        (ionSelect)="setCurrentFeed(i, $event)">
+        <ion-label>{{ feed.title }}</ion-label>
+      </ion-segment-button>
+    </ion-segment>
   </ion-toolbar>
 </ion-header>
 
-<ion-content padding>
+<ion-content padding [ngSwitch]="isGrid">
+  <ion-fab 
+    *ngIf="platform.is('desktop'); else pullToRefresh" 
+    horizontal="end" 
+    vertical="top" 
+    slot="fixed">
+    <ion-fab-button 
+      color="secondary" 
+      mini 
+      (click)="getFeed(selectedFeed.url, $event)">
+      <ion-icon name="refresh"></ion-icon>
+    </ion-fab-button>
+    <ion-fab-button 
+      color="secondary" 
+      mini 
+      [attr.margin-top]="platform.is('desktop')"
+      (click)="toggleView()">
+      <ion-icon [name]="isGrid ? 'list': 'grid'"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+  <ng-template #pullToRefresh>
+    <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+      <ion-refresher-content
+        pullingIcon="refresh"
+        pullingText="Refresh news..."
+        refreshingSpinner="circles"
+        refreshingText="loading feed...">
+      </ion-refresher-content>
+    </ion-refresher>
+  </ng-template>
+
   <ion-list>
     <ion-list-header>
-      <h1>Coffee News</h1>
-    </ion-list-header>
-    <ion-item button detail="true" detailIcon="open" *ngFor="let story of newsList" [href]="story.link">
-      <ion-thumbnail slot="start">
-        <ion-img [src]="story.thumbnail"></ion-img>
-      </ion-thumbnail>
       <ion-label>
-        <h2 text-wrap>{{ story.title }}</h2>
-        <h3>{{ story.pubDate.slice(0, -9) }}</h3>
-        <p>By: {{ story.author }}</p>
+        <h1>{{ selectedFeed.title }}</h1>
+        <h6>
+          <ion-text>{{ currentFeed?.feed.link}}</ion-text>
+        </h6>
       </ion-label>
-    </ion-item>
+    </ion-list-header>
+
+    <ion-grid *ngIf="isGrid; else listView">
+      <ion-row>
+        <ion-col size="12" size-md="6" size-lg="4" size-xl="3" *ngFor="let item of currentFeed?.items; let i = index">
+          <ion-card color="light">
+            <ion-card-header color="light">
+              <ion-toolbar color="light">
+                  <ion-thumbnail slot="start" margin-end *ngIf="item?.thumbnail">
+                    <ion-img [src]="item?.thumbnail"></ion-img>
+                  </ion-thumbnail>
+      
+                <ion-card-title>{{ item?.title }}</ion-card-title>
+                <ion-card-subtitle>By: {{ item?.author }} - {{ item?.pubDate | date:'dd-MM-yyyy' }}</ion-card-subtitle>
+              </ion-toolbar>
+            </ion-card-header>
+      
+            <ion-card-content color="light">
+              <p>{{ item?.description | sanitizeHtml | truncate: 95}}</p>
+              
+            </ion-card-content>
+            <ion-footer>
+              <ion-toolbar>
+                <ion-button fill="clear" expand="full" [href]="item.link">
+                  Read more
+                  <ion-icon slot="end" name="open"></ion-icon>
+                </ion-button>
+              </ion-toolbar>
+            </ion-footer>
+          </ion-card>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+    <!--<ion-card color="light" *ngFor="let item of currentFeed.items">
+      <ion-card-header color="light">
+        <ion-toolbar color="light">
+            <ion-thumbnail slot="start" margin-end>
+              <ion-img [src]="item?.thumbnail"></ion-img>
+            </ion-thumbnail>
+
+          <ion-card-title><a [href]="item.link">{{ item?.title }}<ion-icon padding-start name="open"></ion-icon></a></ion-card-title>
+          <ion-card-subtitle>{{ item?.pubDate | date:'dd-MM-yyyy' }}</ion-card-subtitle>
+        </ion-toolbar>
+      </ion-card-header>
+
+      <ion-card-content color="light">
+        <p>
+          {{ item?.description | sanitizeHtml }} 
+        </p>
+      </ion-card-content>
+    </ion-card>-->
+    <ng-template #listView>
+      <ion-item 
+        button 
+        *ngFor="let item of currentFeed?.items"
+        detail="true" 
+        detailIcon="open"  
+        [href]="item.link">
+        <ion-thumbnail slot="start">
+          <ion-img [src]="item?.thumbnail"></ion-img>
+        </ion-thumbnail>
+        <ion-label>
+          <h2 text-wrap>{{ item?.title }}</h2>
+          <h3>{{ item?.pubDate | date:'dd-MM-yyyy' }}</h3>
+          <p>By: {{ item?.author }}</p>
+        </ion-label>
+      </ion-item>
+    </ng-template>
+    
+
   </ion-list>
   <!--<p>If you get lost, the <a target="_blank" rel="noopener" href="https://ionicframework.com/docs">docs</a> will be your guide.</p>-->
 </ion-content>

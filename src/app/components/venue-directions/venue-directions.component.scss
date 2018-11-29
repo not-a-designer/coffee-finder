@@ -1,0 +1,35 @@
+ion-card {
+    height: auto;
+    z-index: 1;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    max-width: 600px !important;
+    width: auto !important;
+    --background: var(--ion-color-light);
+
+    ion-card-content > div#directions-panel * .adp-directions {
+        position: relative !important;
+        min-width: 400px !important;
+        max-width: 530px !important;
+        width: 100% !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+        text-align: center !important;
+        align-content: center !important;
+    }
+}
+
+
+#directions-map {
+    height: 250px;
+    transition: height .33s;
+
+    @media screen and (min-width: 768px) {
+        height: 350px;
+    }
+}
+
+.direction-icon {
+    transform: rotateX(180deg) !important;
+}
+
