@@ -20,7 +20,7 @@ import { TwitterConnect }                      from '@ionic-native/twitter-conne
 
 import { AgmCoreModule, GoogleMapsAPIWrapper } from '@agm/core';
 
-import { AdsenseModule }                       from 'ng2-adsense';
+//import { AdsenseModule }                       from 'ng2-adsense';
 
 import { environment }                         from '@environments/environment'
 import { AppRoutingModule }                    from './app-routing.module';
@@ -53,11 +53,11 @@ import { UserService }                         from '@app-services/user/user.ser
       libraries: ['places'],
       language: 'en-US'
     }),
-    AdsenseModule.forRoot({
+    /*AdsenseModule.forRoot({
       adClient: environment.adSenseConfig.google_ad_client,
       adSlot: environment.adSenseConfig.google_ad_slot,
       pageLevelAds: environment.adSenseConfig.enable_page_level_ads
-    }),
+    }),*/
     ComponentsModule,
     PipesModule
   ],
@@ -67,7 +67,6 @@ import { UserService }                         from '@app-services/user/user.ser
     AuthService,
     AuthGuard,
     Facebook,
-    //FourSquareService,
     Geolocation,
     GoogleMapsAPIWrapper,
     GooglePlus,

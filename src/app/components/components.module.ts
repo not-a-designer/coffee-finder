@@ -8,7 +8,7 @@ import { VenueDetailsCardComponent } from '@app-components/venue-details-card/ve
 import { StarRatingComponent }       from '@app-components/star-rating/star-rating.component';
 import { RadiusSliderComponent }     from '@app-components/radius-slider/radius-slider.component';
 import { VenueDirectionsComponent }  from './venue-directions/venue-directions.component';
-import { AdsenseBannerComponent }    from './adsense-banner/adsense-banner.component';
+//import { AdsenseBannerComponent }    from './adsense-banner/adsense-banner.component';
 
 
 @NgModule({
@@ -17,7 +17,7 @@ import { AdsenseBannerComponent }    from './adsense-banner/adsense-banner.compo
         StarRatingComponent, 
         RadiusSliderComponent, 
         VenueDirectionsComponent, 
-        AdsenseBannerComponent
+        //AdsenseBannerComponent
     ],
 
     imports: [
@@ -31,7 +31,7 @@ import { AdsenseBannerComponent }    from './adsense-banner/adsense-banner.compo
         StarRatingComponent, 
         RadiusSliderComponent, 
         VenueDirectionsComponent, 
-        AdsenseBannerComponent
+        //AdsenseBannerComponent
     ],
 
     entryComponents: [ 
@@ -39,7 +39,7 @@ import { AdsenseBannerComponent }    from './adsense-banner/adsense-banner.compo
         StarRatingComponent, 
         RadiusSliderComponent, 
         VenueDirectionsComponent, 
-        AdsenseBannerComponent
+        //AdsenseBannerComponent
     ]
 })
 export class ComponentsModule {}

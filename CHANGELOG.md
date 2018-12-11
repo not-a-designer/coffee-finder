@@ -2,6 +2,14 @@
 
 
 
+### 0.0.1 12/11/2018 'UI changes for small screens'
+
+#### Features
+- Location radius component optimized for all screen sizes
+- Home page fab buttons become toolbar buttons for small screens
+
+
+
 ### 0.0.1 11/29/2018 'Geolocation fixes, ui fixes'
 
 #### Features

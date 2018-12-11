@@ -7,7 +7,7 @@ import { IonicModule }                      from '@ionic/angular';
 
 import { AgmCoreModule }                    from '@agm/core';
 
-import { AdsenseModule }                    from 'ng2-adsense';
+//import { AdsenseModule }                    from 'ng2-adsense';
 
 import { environment }                      from '@environments/environment';
 import { ComponentsModule }                 from '@app-components/components.module';
@@ -28,11 +28,11 @@ const routes: Routes = [{ path: '', component: CoffeeMapPage }];
       libraries: ['places'],
       language: 'en-US'
     }),
-    AdsenseModule.forRoot({
+    /*AdsenseModule.forRoot({
       adClient: environment.adSenseConfig.google_ad_client,
       adSlot: environment.adSenseConfig.google_ad_slot,
       pageLevelAds: environment.adSenseConfig.enable_page_level_ads
-    }),
+    }),*/
     ComponentsModule
   ],
 

@@ -1,14 +1,43 @@
 <ion-header>
   <ion-toolbar color="primary">
     <ion-title>Coffee News</ion-title>
+
+    <ng-container *ngIf="platform.width() < 576">
+      <ion-buttons [attr.slot]="platform.is('desktop') ? 'primary' : 'end'">
+        <ion-button icon-only fill="clear">
+          <ion-icon [name]="isGrid ? 'list': 'grid'"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+      
+      <ion-buttons slot="end" *ngIf="platform.is('desktop')">
+        <ion-button 
+          *ngIf="platform.is('desktop'); else pullToRefresh" 
+          icon-only 
+          fill="clear" 
+          (click)="getFeed(selectedFeed.url, $event)">
+          <ion-icon name="refresh"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+    </ng-container>
   </ion-toolbar>
   
   <ion-toolbar color="primary">
-    <ion-segment [(ngModel)]="selectedTitle" scrollable="true">
+    <ion-select 
+      *ngIf="platform.width() < 576" 
+      [(ngModel)]="selectedTitle" 
+      interface="action-sheet" 
+      placeholder="Select a news feed"
+      [interfaceOptions]="customActionsheetOptions">
+      <ion-select-option 
+        *ngFor="let feed of feeds; let i = index"   
+        [value]="feed.title">{{feed.title }}</ion-select-option>
+    </ion-select>
+
+    <ion-segment *ngIf="platform.width() >= 576" [(ngModel)]="selectedTitle" scrollable="true">
       <ion-segment-button 
         *ngFor="let feed of feeds; let i = index"   
         [value]="feed.title" 
-        (ionSelect)="setCurrentFeed(i, $event)">
+        (ionSelect)="setCurrentFeed($event, i)">
         <ion-label>{{ feed.title }}</ion-label>
       </ion-segment-button>
     </ion-segment>
@@ -16,25 +45,28 @@
 </ion-header>
 
 <ion-content padding [ngSwitch]="isGrid" [scrollEvents]="true">
-  <ion-fab 
-    *ngIf="platform.is('desktop'); else pullToRefresh" 
-    horizontal="end" 
-    vertical="top" 
-    slot="fixed">
-    <ion-fab-button 
+  <ng-container *ngIf="platform.width() >= 576">
+    <ion-fab 
+      *ngIf="platform.is('desktop'); else pullToRefresh" 
+      horizontal="end" 
+      vertical="top" 
+      slot="fixed">
+      <ion-fab-button 
+        color="secondary" 
+        mini 
+        (click)="getFeed(selectedFeed.url, $event)">
+        <ion-icon name="refresh"></ion-icon>
+      </ion-fab-button>
+      <ion-fab-button 
       color="secondary" 
-      mini 
-      (click)="getFeed(selectedFeed.url, $event)">
-      <ion-icon name="refresh"></ion-icon>
-    </ion-fab-button>
-    <ion-fab-button 
-      color="secondary" 
-      mini 
-      [attr.margin-top]="platform.is('desktop')"
-      (click)="toggleView()">
-      <ion-icon [name]="isGrid ? 'list': 'grid'"></ion-icon>
-    </ion-fab-button>
-  </ion-fab>
+        mini 
+        [attr.margin-top]="platform.is('desktop')"
+        (click)="toggleView()">
+        <ion-icon [name]="isGrid ? 'list': 'grid'"></ion-icon>
+      </ion-fab-button>
+    </ion-fab>
+  </ng-container>
+
   <ng-template #pullToRefresh>
     <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
       <ion-refresher-content
@@ -51,7 +83,7 @@
       <ion-label>
         <h1>{{ selectedTitle }}</h1>
         <h6>
-          <ion-text>{{ currentFeed?.feed.link}}</ion-text>
+          <a [href]="currentFeed?.feed.link">{{ currentFeed?.feed.link}}</a>
         </h6>
       </ion-label>
     </ion-list-header>
@@ -111,4 +143,4 @@
   
   <!--<ng-adsense id="adsense" [adClient]="adClient" [adSlot]="adSlot"></ng-adsense>-->
 </ion-content>
-<adsense-banner></adsense-banner>
+<!--<adsense-banner></adsense-banner>-->

@@ -14,6 +14,7 @@ import { environment }               from '@environments/environment';
 import { AuthService }               from '@app-services/auth/auth.service';
 import { RssFeedService, RSSResult } from '@app-services/rss-feed/rss-feed.service';
 import { CoffeeUser }                from '@app-interfaces/coffee-user';
+import { ActionSheetOptions } from '@ionic/core';
 
 
 interface RssData {
@@ -71,6 +72,11 @@ export class HomePage implements AfterViewInit, OnInit {
 
   public isGrid: boolean = true;
 
+  public customActionsheetOptions: any = {
+    header: 'Coffee News',
+    subHeader: 'Select a feed'
+  };
+
   constructor(private auth: AuthService, 
               public platform: Platform, 
               private toastCtrl: ToastController,
@@ -80,7 +86,7 @@ export class HomePage implements AfterViewInit, OnInit {
   public async ngOnInit(): Promise<void> { 
     try {
       this.user$ = this.auth.user$;
-      this.setCurrentFeed(0, null);
+      this.setCurrentFeed({}, 0);
     }
     catch(e) { console.log(e) }
   }
@@ -110,16 +116,13 @@ export class HomePage implements AfterViewInit, OnInit {
     }, 500);
   }
 
-  public async setCurrentFeed(index: number, event) {
+  public async setCurrentFeed(event, index?: number) {
     try {
-      
       const loader = await this.showLoader('Loading feed...');
       await loader.present();
 
-      //console.log({ event });
+      index = index || 0;
       this.selectedFeed = this.feeds[index];
-      this.selectedTitle = this.selectedFeed.title;
-      //console.log('current feed set: ', this.selectedFeed.title);
       await this.getFeed();
       this.content.scrollToTop();
       loader.dismiss();
