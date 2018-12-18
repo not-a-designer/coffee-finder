@@ -4,7 +4,7 @@
 
     <ng-container *ngIf="platform.width() < 576">
       <ion-buttons [attr.slot]="platform.is('desktop') ? 'primary' : 'end'">
-        <ion-button icon-only fill="clear">
+        <ion-button icon-only fill="clear" (click)="toggleView()">
           <ion-icon [name]="isGrid ? 'list': 'grid'"></ion-icon>
         </ion-button>
       </ion-buttons>
@@ -53,13 +53,13 @@
       slot="fixed">
       <ion-fab-button 
         color="secondary" 
-        mini 
+        size="small" 
         (click)="getFeed(selectedFeed.url, $event)">
         <ion-icon name="refresh"></ion-icon>
       </ion-fab-button>
       <ion-fab-button 
-      color="secondary" 
-        mini 
+        color="secondary" 
+        size="small" 
         [attr.margin-top]="platform.is('desktop')"
         (click)="toggleView()">
         <ion-icon [name]="isGrid ? 'list': 'grid'"></ion-icon>

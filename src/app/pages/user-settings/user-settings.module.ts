@@ -7,9 +7,11 @@ import { IonicModule }          from '@ionic/angular';
 
 import { UserSettingsPage }     from './user-settings.page';
 import { PipesModule }          from '@app-pipes/pipes.module'; 
+import { AuthGuard }            from '@app-services/auth/auth.guard';
 
 
-const routes: Routes = [{ path: '', component: UserSettingsPage }];
+const routes: Routes = [
+  { path: '', component: UserSettingsPage, canActivate: [AuthGuard] },];
 
 
 @NgModule({

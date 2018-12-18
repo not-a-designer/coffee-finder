@@ -78,7 +78,7 @@
                 slot="end" 
                 icon-only 
                 fill="clear" 
-                href="/tabs/(map:map)">
+                routerLink="/tabs/map">
                 <ion-icon name="create"></ion-icon>
               </ion-button>
               <ion-button 
@@ -95,7 +95,7 @@
               <ion-item>
                 <ion-icon slot="start"  name="sad"></ion-icon>
                 No favorite location
-                <ion-button no-padding slot="end" icon-only fill="clear" href="/tabs/(map:map)">
+                <ion-button no-padding slot="end" icon-only fill="clear" routerLink="/tabs/map">
                   <ion-icon name="add"></ion-icon>
                 </ion-button>
               </ion-item>
@@ -221,11 +221,11 @@
 
   <ion-toolbar color="light" id="copy-toolbar" no-padding>
       <ion-item color="light" no-margin no-padding lines="none" id="copyright-info">
-        <ion-button slot="start" fill="clear" href="/tabs/(settings:tos)">
+        <ion-button slot="start" fill="clear" routerLink="/tos" routerDirection="forward">
           Terms of Service
         </ion-button>
 
-        <ion-button slot="end" fill="clear" href="/tabs/(settings:privacy)">
+        <ion-button slot="end" fill="clear" routerLink="/privacy" routerDirection="forward">
           Privacy Policy
         </ion-button>
       </ion-item>

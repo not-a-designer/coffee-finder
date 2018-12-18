@@ -19,33 +19,37 @@ const routes: Routes = [
     component: TabsPage,
     children: [
       //home tab
-      { path: 'home', outlet: 'home', component: HomePage  },
-      //map tab
-      { path: 'map', outlet: 'map', component: CoffeeMapPage },
 
+      //UPDATED TO IONIC 4.0.0-beta.19
+      
+      //{ path: 'home', outlet: 'home', component: HomePage  },
+      { path: 'home', loadChildren: '../home/home.module#HomePageModule'},
+      //map tab
+      //{ path: 'map', outlet: 'map', component: CoffeeMapPage },
+      { path: 'map', loadChildren: '../coffee-map/coffee-map.module#CoffeeMapPageModule' },
       //main settings tab
-      { 
-        path: 'settings', 
+      /*{ path: 'settings', 
         outlet: 'settings', 
         component: UserSettingsPage, 
         canActivate: [ AuthGuard ], 
-      },
+      },*/
+      { path: 'settings', loadChildren: '../user-settings/user-settings.module#UserSettingsPageModule' },
 
       //auth tabs
-      { path: 'login', outlet: 'settings', component: LoginPage },
-      { path: 'register', outlet: 'settings', component: RegisterPage },
+      //{ path: 'login', outlet: 'settings', component: LoginPage },
+     // { path: 'register', outlet: 'settings', component: RegisterPage },
 
       //legal tabs
-      { path: 'privacy', outlet: 'settings', component: PrivacyPage },
-      { path: 'tos', outlet: 'settings', component: TosPage },
+      //{ path: 'privacy', outlet: 'settings', component: PrivacyPage },
+      //{ path: 'tos', outlet: 'settings', component: TosPage },
 
       //redirect
-      { path: '', redirectTo: '/tabs/(home:home)', pathMatch: 'full' },
+      { path: '', redirectTo: '/tabs/home', pathMatch: 'full' },
     ]
   },
 
   //redirect 
-  { path: '', redirectTo: '/tabs/(home:home)', pathMatch: 'full' }
+  { path: '', redirectTo: '/tabs/home', pathMatch: 'full' }
 ];
 
 

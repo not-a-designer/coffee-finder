@@ -46,7 +46,7 @@ export class RegisterPage implements OnInit {
         console.log('user: ', credential.user);
         this.users.updateUser(credential.user);
         loader.dismiss();
-        this.router.navigateByUrl('/tabs/(map:map)');
+        this.router.navigateByUrl('/tabs/map');
       }
     }
     catch(e) { if (loader != undefined) loader.dismiss() }

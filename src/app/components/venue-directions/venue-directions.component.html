@@ -38,7 +38,8 @@
 
           <ion-label text-wrap>
             <span float-start>{{ i + 1 }}.&nbsp;</span>
-            {{ step.instructions | sanitizeDirections }}
+            <span [innerHtml]="step.instructions"></span>
+            <!--{{ step.instructions | sanitizeDirections }}-->
           </ion-label>
           <ion-note slot="end">
             {{ step.distance.text }}

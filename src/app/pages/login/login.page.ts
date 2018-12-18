@@ -38,7 +38,7 @@ export class LoginPage implements OnInit {
       if (credential.user) {
         console.log('user: ', credential.user);
         this.users.updateUser(credential.user);
-        this.router.navigateByUrl('/tabs/(settings:settings)');
+        this.router.navigateByUrl('/tabs/settings');
       }
       else console.log('user error'); 
     }
@@ -54,7 +54,7 @@ export class LoginPage implements OnInit {
       if (credential.user) {
         console.log('user: ', credential.user);
         this.users.updateUser(credential.user);
-        this.router.navigateByUrl('/tabs/(settings:settings)');
+        this.router.navigateByUrl('/tabs/settings');
       }
       else console.log('user error'); 
     }
@@ -70,7 +70,7 @@ export class LoginPage implements OnInit {
       if (credential.user) {
         console.log('user: ', credential.user);
         this.users.updateUser(credential.user);
-        this.router.navigateByUrl('/tabs/(settings:settings)');
+        this.router.navigateByUrl('/tabs/settings');
       }
       else console.log('user error'); 
     }
@@ -92,7 +92,7 @@ export class LoginPage implements OnInit {
         console.log('user: ', credential.user);
         this.users.updateUser(credential.user);
         loader.dismiss();
-        this.router.navigateByUrl('/tabs/(settings:settings)');
+        this.router.navigateByUrl('/tabs/settings');
       }
     }
     catch(e) { 

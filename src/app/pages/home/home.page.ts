@@ -3,7 +3,7 @@ import { AfterViewInit,
          OnInit, 
          ViewChild }                 from '@angular/core';
 
-import { Content,
+import { IonContent,
          LoadingController, 
          Platform, 
          ToastController }           from '@ionic/angular';
@@ -31,7 +31,7 @@ interface RssData {
 })
 export class HomePage implements AfterViewInit, OnInit {
 
-  @ViewChild(Content) public content: Content;
+  @ViewChild(IonContent) public content: IonContent;
 
   public user$: Observable<CoffeeUser>;
   public feeds: Array<RssData> = [

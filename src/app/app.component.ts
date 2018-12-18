@@ -75,9 +75,9 @@ export class AppComponent {
             if (this.router.url.includes('login') || 
               this.router.url.includes('register') || 
               this.router.url.includes('tos') || 
-              this.router.url.includes('privacy')) this.router.navigateByUrl('/tabs/(settings:settings)');
-            if (this.router.url.includes('settings')) this.router.navigateByUrl('/tabs/(map:map)');
-            if (this.router.url.includes('map')) this.router.navigateByUrl('/tabs/(home:home)');
+              this.router.url.includes('privacy')) this.router.navigateByUrl('/tabs/settings');
+            if (this.router.url.includes('settings')) this.router.navigateByUrl('/tabs/map');
+            if (this.router.url.includes('map')) this.router.navigateByUrl('/tabs/home');
             //show quitAlert
             else this.showExitAlert;
           }

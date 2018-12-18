@@ -112,7 +112,6 @@ export class CoffeeMapPage implements OnInit, AfterViewInit {
   public ngOnInit(): void {
     this.startAdmob();
     this.auth.user$.pipe(take(1)).subscribe((user) => this.user = user);
-    this.getCurrentLocation();
     this.loadMap();
   }
 
@@ -156,7 +155,6 @@ export class CoffeeMapPage implements OnInit, AfterViewInit {
         center: new google.maps.LatLng(this.currentLat, this.currentLng),
         radius: this.radius
       });
-
       this.nearbySearch();
       loader.dismiss();
     }
@@ -173,10 +171,10 @@ export class CoffeeMapPage implements OnInit, AfterViewInit {
         duration: 500
       });
       await loader.present();
-
+      this.getCurrentLocation();
       await this.mapsAPILoader.load();
       this.map = new google.maps.Map(this.mapElement.nativeElement, {
-        center: new google.maps.LatLng(this.currentLat, this.currentLng),
+        center: { lat: this.currentLat, lng: this.currentLng },
         zoom: 13,
         clickableIcons: false,
         disableDefaultUI: true
@@ -196,6 +194,8 @@ export class CoffeeMapPage implements OnInit, AfterViewInit {
         this.geocoder = new google.maps.Geocoder();
         this.placesService = new google.maps.places.PlacesService(this.map);
         this.directionsService = new google.maps.DirectionsService();
+
+        this.updateLocation();
         this.nearbySearch();
         loader.dismiss();
       });

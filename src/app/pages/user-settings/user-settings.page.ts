@@ -126,7 +126,7 @@ export class UserSettingsPage implements OnInit {
       this.users.updateUserSettings(this.user);
 
       this.changesSaved = true;
-      await this.router.navigateByUrl('/tabs/(map:map)');
+      await this.router.navigateByUrl('/tabs/map');
       loader.dismiss();
     }
     catch(e) { console.log('saveUser() error: ', e) }

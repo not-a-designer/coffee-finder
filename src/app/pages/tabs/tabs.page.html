@@ -1,5 +1,5 @@
 <ion-tabs>
-  <ion-tab tab="home">
+  <!--<ion-tab tab="home">
     <ion-router-outlet stack name="home"></ion-router-outlet>
   </ion-tab>
 
@@ -9,20 +9,20 @@
 
   <ion-tab tab="settings">
     <ion-router-outlet stack name="settings"></ion-router-outlet>
-  </ion-tab>
+  </ion-tab>-->
 
-  <ion-tab-bar highlight="true" slot="bottom" color="primary">
-    <ion-tab-button tab="home" href="/tabs/(home:home)">
+  <ion-tab-bar slot="bottom" color="primary">
+    <ion-tab-button tab="home">
       <ion-icon name="home"></ion-icon>
       <ion-label>Home</ion-label>
     </ion-tab-button>
 
-    <ion-tab-button tab="map" href="/tabs/(map:map)">
+    <ion-tab-button tab="map">
       <ion-icon name="map"></ion-icon>
       <ion-label>Map</ion-label>
     </ion-tab-button>
 
-    <ion-tab-button tab="settings" href="/tabs/(settings:settings)">
+    <ion-tab-button tab="settings">
       <ion-icon name="settings"></ion-icon>
       <ion-label>Settings</ion-label>
     </ion-tab-button>

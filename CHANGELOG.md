@@ -2,6 +2,15 @@
 
 
 
+### 0.0.1 12/18/2018 'Update Ionic Framework to 4.0.0-beta-19, sqlite updated'
+
+#### Features
+- Tabs markup and logic updated for unnamed outlets
+- Cordova SQLite plugin updated as per security fix
+- Minor UI changes
+
+
+
 ### 0.0.1 12/11/2018 'UI changes for small screens'
 
 #### Features
